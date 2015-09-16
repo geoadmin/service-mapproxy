@@ -1,0 +1,8 @@
+MapProxy==1.8.0
+Pillow==2.9.0
+PyYAML==3.11
+WebOb==1.5.0b0
+argparse==1.2.1
+distribute==0.6.24
+uWSGI==2.0.11.1
+wsgiref==0.1.2

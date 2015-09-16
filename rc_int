@@ -1,0 +1,2 @@
+export DEPLOY_TARGET=int
+export APACHE_BASE_PATH=

@@ -7,6 +7,7 @@
 .coverage
 .idea
 .installed.cfg
+.build-artefacts/
 apache/wsgi.conf
 apache/mapproxy.conf
 apache/tomcat-print.conf
@@ -28,6 +29,8 @@ MANIFEST
 buildout_branch.cfg
 deploy/deploy-branch.cfg
 deploy/conf/00-branch.conf
-print/WEB-INF/web.xml
-chsdi/tests/mapproxy*
-chsdi/tests/varnish*
+mapproxy/application.py
+mapproxy/wsgi.py
+env
+apache/app.conf
+
