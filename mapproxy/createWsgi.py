@@ -18,7 +18,6 @@ for path in reversed(syspaths):
          sys.path[0:0]=[path]
 
 
-from paste.deploy import loadapp
 from webob import Request
 
 class NoContentMiddleware(object):
@@ -63,11 +62,11 @@ output = WRAPPER_TEMPLATE % dict(
     log_config=os.path.join(buildout_dir, 'mapproxy/log.ini')
 )
 
-location = os.path.abspath(os.path.join(buildout_dir, 'buildout/parts/mapproxy'))
+location = os.path.abspath(os.path.join(buildout_dir, 'mapproxy'))
 
 if not os.path.exists(location):
     os.mkdir(location)
-target = os.path.join(location, "wsgi")
+target = os.path.join(location, "wsgi.py")
 print target
 try:
     f = open(target, "wt")

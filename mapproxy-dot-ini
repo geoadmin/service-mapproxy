@@ -1,0 +1,7 @@
+[uwsgi]
+http = 127.0.0.1:9001
+chdir = ${apache_base_directory}
+virtualenv =  ${apache_base_directory}/.build-artefacts/python-venv/
+wsgi-file = mapproxy/application.py
+processes = 4
+threads = 2
