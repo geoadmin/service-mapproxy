@@ -64,7 +64,7 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	cp scripts/cmd.py .build-artefacts/python-venv/local/lib/python2.7/site-packages/mako/cmd.py
 
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "Mapproxy==1.7.0"
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
