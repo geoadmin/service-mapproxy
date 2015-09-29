@@ -1,2 +1,4 @@
 export DEPLOY_TARGET=prod
 export APACHE_BASE_PATH=
+export MODWSGI_USER=main
+
