@@ -1,4 +1,4 @@
-mservice-mapproxy
+service-mapproxy
 ================
 
 Mapproxy configuration and service for 'geo.admin.ch'!
