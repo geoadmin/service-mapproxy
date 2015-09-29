@@ -10,18 +10,16 @@ RewriteRule ^${apache_base_path}/1.0.0/(.*)/default/(\d+|current|default)/(\d+)/
 WSGIDaemonProcess service-mapproxy:${modwsgi_user}-mapproxy python-path= ${apache_base_directory}/.build-artefacts/python-venv:${apache_base_directory}/.build-artefacts/python-venv/lib/python2.7/site-packages   display-name=%{GROUP}  user=www-data
 
 # define the path to the WSGI app
-WSGIScriptAliasMatch ^${apache_base_path}/mapproxy ${apache_base_directory}/mapproxy/wsgi.py
+WSGIScriptAliasMatch ^${apache_base_path}/ ${apache_base_directory}/mapproxy/wsgi.py
 
 
-<Directory ${apache_base_directory}/mapproxy>
+<Directory ${apache_base_directory}/>
     WSGIProcessGroup service-mapproxy:${modwsgi_user}-mapproxy
     WSGIApplicationGroup %{GLOBAL}
 
     Order Deny,Allow
     Allow from all
 
-    Header unset Cache-Control
-    Header merge Cache-Control "no-cache"
 </Directory>
 
 <Location ${apache_base_path}/1.0.0>
