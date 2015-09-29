@@ -1,7 +1,7 @@
 APACHE_BASE_PATH ?= /$(shell id -un)
 APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
-
+API_URL ?= http://api3.geo.admin.ch
 
 
 ## Python interpreter can't have space in path name
@@ -18,6 +18,7 @@ help:
 	@echo
 	@echo "- all              Install everything"
 	@echo "- mapproxy         Install and configure mapproxy"
+	@echo "- config           Configure mapproxy (mapproxy.yaml)"
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- clean            Remove generated files"
 	@echo "- help             Display this help"
@@ -26,7 +27,7 @@ help:
 	@echo
 	@echo "- APACHE_BASE_PATH Base path  (current value: $(APACHE_BASE_PATH))"
 	@echo "- APACHE_BASE_DIRECTORY       (current value: $(APACHE_BASE_DIRECTORY))"
-
+	@echo "- API_URL                     (current value: $(API_URL))"
 	@echo
 
 
@@ -36,6 +37,11 @@ all: mapproxy \
 
 .PHONY: apache
 apache: apache/app.conf
+
+.PHONY: config
+config: .build-artefacts/python-venv
+	${PYTHON_CMD} mapproxy/scripts/mapproxify.py $(API_URL)  
+	touch $@
 
 .PHONY: mapproxy
 mapproxy: .build-artefacts/python-venv/bin/mapproxy \
@@ -61,8 +67,8 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "Mapproxy==1.7.0"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
 	touch $@
-
 
 apache/app.conf: apache/app.mako-dot-conf 
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/mako-render \
@@ -74,6 +80,7 @@ mapproxy/application.py:  mapproxy/application-dot-py
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/mako-render \
 		--var "apache_base_directory=$(APACHE_BASE_DIRECTORY)" \
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
+
 mapproxy/wsgi.py: mapproxy/createWsgi.py
 	  ${PYTHON_CMD} mapproxy/createWsgi.py 
 

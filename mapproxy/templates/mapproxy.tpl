@@ -3,13 +3,10 @@ services:
   demo:
   kml:
   tms:
-      origin: 'sw'
-      use_grid_names: true
-
   wmts:
      restful: true
      kvp: false
-     restful_template: /1.0.0/{Layer}/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.{Format}
+     restful_template: /1.0.0/{Layer}/default/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.{Format}
 
   wms:
     srs: ['EPSG:4326', 'CRS:84', 'EPSG:21781', 'EPSG:4258', 'EPSG:3857', 'EPSG:2056']

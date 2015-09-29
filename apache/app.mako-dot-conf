@@ -5,16 +5,9 @@
 RewriteEngine On
 ExpiresActive On
 
-# MapProxy access control
-RewriteRule ^${apache_base_path}/1.0.0/WMTSCapabilities.EPSG.(\d+).xml ${apache_base_path}/rest/services/api/1.0.0/WMTSCapabilities.xml?epsg=$1 [L,QSA,PT]
-RewriteRule ^${apache_base_path}/1.0.0/WMTSCapabilities.xml ${apache_base_path}/rest/services/api/1.0.0/WMTSCapabilities.xml [L,QSA,PT]
-# Better ArcGis support
-RewriteRule ^${apache_base_path}/EPSG/(\d+)/1.0.0/WMTSCapabilities.xml ${apache_base_path}/rest/services/api/1.0.0/WMTSCapabilities.xml?epsg=$1 [L,QSA,PT]
-RewriteRule ^${apache_base_path}/EPSG/(\d+)/(de|fr|it|rm|en)/1.0.0/WMTSCapabilities.xml ${apache_base_path}/rest/services/api/1.0.0/WMTSCapabilities.xml?epsg=$1&lang=$2 [L,PT]
+RewriteRule ^${apache_base_path}/1.0.0/(.*)/default/(\d+|current|default)/(\d+)/(.*)   ${apache_base_path}/mapproxy/wmts/1.0.0/$1_$2_epsg_$3/default/epsg_$3/$4 [L,QSA,PT]
 
-RewriteRule ^${apache_base_path}/1.0.0/(.*)/default/(\d+|current|default)/(\d+)/(.*)   ${apache_base_path}/mapproxy/wmts/1.0.0/$1_$2/default/$2/epsg_$3/$4 [L,QSA,PT]
-
-WSGIDaemonProcess service-mapproxy:${modwsgi_user}-mapproxy python-path=${apache_base_directory}/.build-artefacts/python-venv:${apache_base_directory}/.build-artefacts/python-venv/lib/python2.7/site-packages   display-name=%{GROUP}  user=www-data
+WSGIDaemonProcess service-mapproxy:${modwsgi_user}-mapproxy python-path= ${apache_base_directory}/.build-artefacts/python-venv:${apache_base_directory}/.build-artefacts/python-venv/lib/python2.7/site-packages   display-name=%{GROUP}  user=www-data
 
 # define the path to the WSGI app
 WSGIScriptAliasMatch ^${apache_base_path}/mapproxy ${apache_base_directory}/mapproxy/wsgi.py

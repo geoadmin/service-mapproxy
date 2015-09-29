@@ -1,5 +1,4 @@
 service-mapproxy
-================
 
 Mapproxy configuration and service for 'geo.admin.ch'!
 
@@ -23,8 +22,18 @@ Build:
     $ make help
 
 
+Using S3 cache:
+
+    Define two environmental variables: MAPPROXY_PROJECT_NAME and MAPPROXY_BUCKET_NAME holding the 
+    information where to store to cached tiles. Then gnerate the `mapproxy.yaml` config with:
+
+    $ make config
+
+    If these variable are not defined and mapproxy does not support S3 caching, a normal `mapproxy.yaml`
+    will be generated.
+
 Testing:
 
     Running the local uWSGI server:
 
-    $  .build-artefacts/python-venv/bin/uwsgi mapproxy.ini
+    $ .build-artefacts/python-venv/bin/uwsgi mapproxy.ini
