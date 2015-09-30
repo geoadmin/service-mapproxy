@@ -304,7 +304,9 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     print "Topics: %s" % ",".join(topics)
     print "Layers: %d, timestamps: %d" % (layers_nb, timestamps_nb)
     if USE_S3_CACHE:
-        print "Using S3 cache: bucket=%s, profile_name=%" % (MAPPROXY_BUCKET_NAME, MAPPROXY_PROFILE_NAME)
+        print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
+    if MAPPROXY_PROFILE_NAME:
+        print "profile_name=%s" % MAPPROXY_PROFILE_NAME
 
 
 if __name__ == '__main__':
