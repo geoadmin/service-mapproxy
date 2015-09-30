@@ -190,8 +190,9 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
     if USE_S3_CACHE:
         mapproxy_config['globals']['cache']['bucket_name'] = MAPPROXY_BUCKET_NAME
-        mapproxy_config['globals']['cache']['s3_profile_name'] = MAPPROXY_PROFILE_NAME
         mapproxy_config['globals']['cache']['tile_lock_dir'] = '/tmp/mapproxy/locks'
+    if MAPPROXY_PROFILE_NAME:
+        mapproxy_config['globals']['cache']['s3_profile_name'] = MAPPROXY_PROFILE_NAME
 
     grid_names = []
 
