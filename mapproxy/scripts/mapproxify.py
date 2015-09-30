@@ -69,7 +69,7 @@ basedir = os.path.dirname(os.path.abspath(os.path.join(os.path.abspath(__file__)
 MAPPROXY_PROFILE_NAME = os.environ.get('MAPPROXY_PROFILE_NAME', None)
 MAPPROXY_BUCKET_NAME = os.environ.get('MAPPROXY_BUCKET_NAME', None)
 
-if MAPPROXY_PROFILE_NAME and MAPPROXY_BUCKET_NAME:
+if MAPPROXY_BUCKET_NAME:
     try:
         from mapproxy.cache import s3
     except ImportError:
@@ -246,7 +246,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             cache['disable_storage'] = False
 
                             cache_dir = '/1.0.0/%s/default/%s/%s/' % (server_layer_name, timestamp, epsg_code)
-                            s3_cache = {"cache_dir": cache_dir, "type": "s3"}
+                            s3_cache = {"cache_dir": cache_dir, "type": "s3", "directory_layout": "tms"}
                             cache['cache'] = s3_cache
 
                         if '.swissimage' in wmts_cache_name:
@@ -304,7 +304,7 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     print "Topics: %s" % ",".join(topics)
     print "Layers: %d, timestamps: %d" % (layers_nb, timestamps_nb)
     if USE_S3_CACHE:
-        print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
+        print "Using S3 cache: bucket=%s, profile_name=%" % (MAPPROXY_BUCKET_NAME, MAPPROXY_PROFILE_NAME)
 
 
 if __name__ == '__main__':
