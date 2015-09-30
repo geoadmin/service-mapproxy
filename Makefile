@@ -33,7 +33,8 @@ help:
 
 .PHONY: all
 all: mapproxy \
-	apache
+	apache \
+	config
 
 .PHONY: apache
 apache: apache/app.conf
@@ -93,4 +94,5 @@ mapproxy.ini:  mapproxy-dot-ini
 clean: clean
 	rm -rf .build-artefacts
 	rm mapproxy.ini
-	rm mapproxy/application.py
+	rm apache/app.conf
+	rm mapproxy/mapproxy.yaml
