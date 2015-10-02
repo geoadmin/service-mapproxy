@@ -52,7 +52,7 @@ total_timestamps = 0
 
 DEFAULT_SERVICE_URL = 'https://api3.geo.admin.ch'
 
-WMTS_BASE_URL = 'http://wmts6.geo.admin.ch'
+WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
 
 DEFAULT_SERVICES = ['demo', 'wms', 'wmts']
 EPSG_CODES = ['4258',  # ETRS89 (source: epsg-registry.org, but many WMTS client use 4852)
