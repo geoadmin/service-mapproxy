@@ -40,6 +40,14 @@ layers:
        Time:
           default: "current"
           values: ["current"]
+  - name: ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326
+    title: SwissTLM3D Color - 3D edition (20140401)
+    sources:
+      - ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326_cache_out
+  - name: ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_epsg_4326
+    title: SwissTLM3D Shades of Grey - 3D edition (20140401)
+    sources:
+      - ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_epsg_4326_cache_out
 
 sources:
   osm_tms:
@@ -57,11 +65,44 @@ sources:
     req:
       url: http://wms.cadastralwebmap.ch/WMS
       layers: cm_wms
-  boundaries_source:
-    type: wms
-    req:
-      url: http://wms.geo.admin.ch
-      layers: ch.swisstopo.swissboundaries3d-gemeinde-flaeche.fill
+  ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_source:
+    coverage:
+      bbox:
+      - 0
+      - 40
+      - 20
+      - 50
+      bbox_srs: EPSG:4326
+    grid: epsg_4326
+    http:
+      headers:
+        Referer: http://mapproxy.geo.admin.ch
+    on_error:
+      204:
+        cache: true
+        response: transparent
+    transparent: true
+    type: tile
+    url: http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com/1.0.0/ch.swisstopo.swisstlm3d-karte-farbe.3d/default/20150401/4326/%(z)d/%(y)d/%(x)d.%(format)s
+  ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_source:
+    coverage:
+      bbox:
+      - 0
+      - 40
+      - 20
+      - 50
+      bbox_srs: EPSG:4326
+    grid: epsg_4326
+    http:
+      headers:
+        Referer: http://mapproxy.geo.admin.ch
+    on_error:
+      204:
+        cache: true
+        response: transparent
+    transparent: true
+    type: tile
+    url: http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com/1.0.0/ch.swisstopo.swisstlm3d-karte-grau.3d/default/20150401/4326/%(z)d/%(y)d/%(x)d.%(format)s
 
 caches:
   ch.kantone.cadastralwebmap-farbe_wms_cache:
@@ -80,6 +121,45 @@ caches:
       font_size: 14
       opacity: 100
       color: [0,0,0]
+  ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_cache:
+    disable_storage: true
+    format: image/jpeg
+    grids:
+    - epsg_4326
+    sources:
+    - ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_source
+  ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326_cache_out:
+     disable_storage: true
+     format: image/jpeg
+     grids:
+     - epsg_4326
+     meta_buffer: 0
+     meta_size:
+     - 1
+     - 1
+     sources:
+     - ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_cache
+
+  ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_cache:
+    disable_storage: true
+    format: image/jpeg
+    grids:
+    - epsg_4326
+    sources:
+    - ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_source
+  ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_epsg_4326_cache_out:
+     disable_storage: true
+     format: image/jpeg
+     grids:
+     - epsg_4326
+     meta_buffer: 0
+     meta_size:
+     - 1
+     - 1
+     sources:
+     - ch.swisstopo.swisstlm3d-karte-grau.3d_20150401_cache
+
+
 
 
 grids:
