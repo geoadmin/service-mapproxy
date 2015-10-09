@@ -20,6 +20,7 @@ help:
 	@echo "- mapproxy         Install and configure mapproxy"
 	@echo "- config           Configure mapproxy (mapproxy.yaml)"
 	@echo "- apache           Configure Apache (restart required)"
+	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
 	@echo "- help             Display this help"
 	@echo
@@ -50,6 +51,9 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	mapproxy/wsgi.py \
 	mapproxy.ini
 
+.PHONY: uwsgi
+uwsgi: .build-artefacts/python-venv/bin/uwsgi
+
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts
 	virtualenv --no-site-packages $@
@@ -65,10 +69,13 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	cp scripts/cmd.py .build-artefacts/python-venv/local/lib/python2.7/site-packages/mako/cmd.py
 
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
+	touch $@
+
+.build-artefacts/python-venv/bin/uwsgi: .build-artefacts/python-venv
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
 	touch $@
 
 apache/app.conf: apache/app.mako-dot-conf 
