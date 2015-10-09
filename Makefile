@@ -2,6 +2,7 @@ APACHE_BASE_PATH ?= /$(shell id -un)
 APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
+PYTHONVENV_OPTS ?= --system-site-packages
 
 
 ## Python interpreter can't have space in path name
@@ -20,6 +21,7 @@ help:
 	@echo "- mapproxy         Install and configure mapproxy"
 	@echo "- config           Configure mapproxy (mapproxy.yaml)"
 	@echo "- apache           Configure Apache (restart required)"
+	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
 	@echo "- help             Display this help"
 	@echo
@@ -28,6 +30,7 @@ help:
 	@echo "- APACHE_BASE_PATH Base path  (current value: $(APACHE_BASE_PATH))"
 	@echo "- APACHE_BASE_DIRECTORY       (current value: $(APACHE_BASE_DIRECTORY))"
 	@echo "- API_URL                     (current value: $(API_URL))"
+	@echo "- PYTHONVENV_OPTS             (current value: $(PYTHONVENV_OPTS))"
 	@echo
 
 
@@ -50,9 +53,12 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	mapproxy/wsgi.py \
 	mapproxy.ini
 
+.PHONY: uwsgi
+uwsgi: .build-artefacts/python-venv/bin/uwsgi
+
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts
-	virtualenv --no-site-packages $@
+	virtualenv ${PYTHONVENV_OPTS}  $@
 
 
 
@@ -65,10 +71,13 @@ mapproxy: .build-artefacts/python-venv/bin/mapproxy \
 	cp scripts/cmd.py .build-artefacts/python-venv/local/lib/python2.7/site-packages/mako/cmd.py
 
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
+	touch $@
+
+.build-artefacts/python-venv/bin/uwsgi: .build-artefacts/python-venv
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
 	touch $@
 
 apache/app.conf: apache/app.mako-dot-conf 
@@ -91,7 +100,7 @@ mapproxy.ini:  mapproxy-dot-ini
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
 .PHONY: clean
-clean: clean
+clean:
 	rm -rf .build-artefacts
 	rm mapproxy.ini
 	rm apache/app.conf
