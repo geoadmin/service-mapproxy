@@ -2,6 +2,7 @@ APACHE_BASE_PATH ?= /$(shell id -un)
 APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
+PYTHONVENV_OPTS ?= --system-site-packages
 
 
 ## Python interpreter can't have space in path name
@@ -29,6 +30,7 @@ help:
 	@echo "- APACHE_BASE_PATH Base path  (current value: $(APACHE_BASE_PATH))"
 	@echo "- APACHE_BASE_DIRECTORY       (current value: $(APACHE_BASE_DIRECTORY))"
 	@echo "- API_URL                     (current value: $(API_URL))"
+	@echo "- PYTHONVENV_OPTS             (current value: $(PYTHONVENV_OPTS))"
 	@echo
 
 
@@ -56,7 +58,7 @@ uwsgi: .build-artefacts/python-venv/bin/uwsgi
 
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts
-	virtualenv --no-site-packages $@
+	virtualenv ${PYTHONVENV_OPTS}  $@
 
 
 
