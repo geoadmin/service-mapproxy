@@ -91,7 +91,7 @@ mapproxy.ini:  mapproxy-dot-ini
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
 .PHONY: clean
-clean: clean
+clean:
 	rm -rf .build-artefacts
 	rm mapproxy.ini
 	rm apache/app.conf
