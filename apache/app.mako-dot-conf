@@ -5,6 +5,9 @@
 RewriteEngine On
 ExpiresActive On
 
+
+Alias /checker ${apache_base_directory}/htdocs/checker
+
 RewriteRule ^${apache_base_path}/1.0.0/(.*)/default/(\d+|current|default)/(\d+)/(.*)   ${apache_base_path}/wmts/1.0.0/$1_$2_epsg_$3/default/epsg_$3/$4 [L,QSA,PT]
 
 WSGIDaemonProcess service-mapproxy:${modwsgi_user}-mapproxy python-path=${apache_base_directory}/.build-artefacts/python-venv:${apache_base_directory}/.build-artefacts/python-venv/lib/python2.7/site-packages   display-name=%{GROUP}  user=www-data
