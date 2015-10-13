@@ -52,7 +52,7 @@ total_timestamps = 0
 
 DEFAULT_SERVICE_URL = 'https://api3.geo.admin.ch'
 
-WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
+DEFAULT_WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
 
 DEFAULT_SERVICES = ['demo', 'wms', 'wmts']
 EPSG_CODES = ['4258',  # ETRS89 (source: epsg-registry.org, but many WMTS client use 4852)
@@ -68,6 +68,7 @@ basedir = os.path.dirname(os.path.abspath(os.path.join(os.path.abspath(__file__)
 
 MAPPROXY_PROFILE_NAME = os.environ.get('MAPPROXY_PROFILE_NAME', None)
 MAPPROXY_BUCKET_NAME = os.environ.get('MAPPROXY_BUCKET_NAME', None)
+WMTS_BASE_URL = os.environ.get('WMTS_BASE_URL', DEFAULT_WMTS_BASE_URL)
 
 if MAPPROXY_BUCKET_NAME:
     try:
