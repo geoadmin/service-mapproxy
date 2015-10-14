@@ -1,7 +1,20 @@
 [uwsgi]
-http = 127.0.0.1:9001
+;http = 127.0.0.1:9001
+socket = /tmp/mapproxy.sock
 chdir = ${apache_base_directory}
 virtualenv =  ${apache_base_directory}/.build-artefacts/python-venv/
-wsgi-file = mapproxy/application.py
+wsgi-file = mapproxy/wsgi.py
 processes = 4
-threads = 2
+plugin = python
+master = 1
+gid = 33
+uid = 33
+vaccum = true
+thunder-lock = true
+max-requests = 5000
+harakiri = 10
+reload-mercy = 8
+no-orphans = 1
+cpu-affinity = 1
+reload-on-rss = 196
+
