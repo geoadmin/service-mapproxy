@@ -158,6 +158,15 @@ def get_mapproxy_template_config(services):
     if mapproxy_config['layers'] is None:
         mapproxy_config['layers'] = []
 
+    for source in mapproxy_config['sources']:
+        try:
+            if mapproxy_config['sources'][source]['type'] == 'tile':
+                url = mapproxy_config['sources'][source]['url']
+                url = url.replace(DEFAULT_WMTS_BASE_URL, WMTS_BASE_URL)
+                mapproxy_config['sources'][source]['url'] = url
+        except KeyError:
+            pass
+
     return mapproxy_config
 
 
