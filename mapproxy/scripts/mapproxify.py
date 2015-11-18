@@ -318,6 +318,7 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
         print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
     if MAPPROXY_PROFILE_NAME:
         print "profile_name=%s" % MAPPROXY_PROFILE_NAME
+    print "WMTS tile source: ", WMTS_BASE_URL
 
 
 if __name__ == '__main__':

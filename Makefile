@@ -3,6 +3,7 @@ APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV_OPTS ?= --system-site-packages
+WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
 
 
 ## Python interpreter can't have space in path name
@@ -27,10 +28,11 @@ help:
 	@echo
 	@echo "Variables:"
 	@echo
-	@echo "- APACHE_BASE_PATH Base path  (current value: $(APACHE_BASE_PATH))"
-	@echo "- APACHE_BASE_DIRECTORY       (current value: $(APACHE_BASE_DIRECTORY))"
-	@echo "- API_URL                     (current value: $(API_URL))"
-	@echo "- PYTHONVENV_OPTS             (current value: $(PYTHONVENV_OPTS))"
+	@echo "- APACHE_BASE_PATH Base path        (current value: $(APACHE_BASE_PATH))"
+	@echo "- APACHE_BASE_DIRECTORY             (current value: $(APACHE_BASE_DIRECTORY))"
+	@echo "- API_URL                           (current value: $(API_URL))"
+	@echo "- PYTHONVENV_OPTS                   (current value: $(PYTHONVENV_OPTS))"
+	@echo "- WMTS_BASE_URL Source for tiles    (current value: $(WMTS_BASE_URL))"
 	@echo
 
 
