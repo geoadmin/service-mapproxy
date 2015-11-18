@@ -182,6 +182,14 @@ def create_wmts_source(server_layer_name, timestamp):
                        204: {
                            "response": "transparent",
                            "cache": True
+                       },
+                       403: {
+                           "response": "transparent",
+                           "cache": True
+                       },
+                       404: {
+                           "response": "transparent",
+                           "cache": True
                        }
                    },
                    "http": {
