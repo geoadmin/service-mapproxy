@@ -48,6 +48,7 @@ topics = []
 baseTopics = ['api']
 USE_S3_CACHE = False
 wms_layers = None
+REQUEST_REFERER = "http://mapproxy-s3-template.geo.admin.ch"
 
 total_timestamps = 0
 
@@ -60,7 +61,7 @@ EPSG_CODES = ['4258',  # ETRS89 (source: epsg-registry.org, but many WMTS client
               '4326',  # WGS1984
               '2056',  # LV95
               '3857']  # Pseudo-Mercator Webmapping
-
+WMS_SERVICE_SUPPORTED_SRS = EPSG_CODES + ['21781']
 USE_SERVERNAME_AS_BODID = True
 current_timestamps = {}
 
@@ -202,7 +203,7 @@ def create_wmts_source(server_layer_name, timestamp):
                    },
                    "http": {
                        "headers": {
-                           "Referer": "http://mapproxy.geo.admin.ch"
+                           "Referer": REQUEST_REFERER
                        }
                    },
                    "coverage": {"bbox": [0, 40, 20, 50], "bbox_srs": "EPSG:4326"}}
@@ -212,7 +213,9 @@ def create_wmts_source(server_layer_name, timestamp):
 def create_wms_source(server_layer_name, url="http://wms.geo.admin.ch"):
     wms_source = {"req": {"layers": server_layer_name, "url": url},
                   "coverage": {"bbox": [0, 40, 20, 50], "bbox_srs": "EPSG:4326"},
-                  "supported_srs": ["EPSG:21781","EPSG:4326", "EPSG:3857","EPSG:2056"],
+                   "http": {"headers": {"Referer": REQUEST_REFERER}},
+                   # TODO: not clear if has to be used or not
+                   #"supported_srs": ["EPSG:%s" % e for e in WMS_SERVICE_SUPPORTED_SRS],
                   "type": "wms"
                   }
     return wms_source
@@ -261,8 +264,9 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                     dimensions = {'Time': {'default': timestamp, 'values': [timestamp]}}
 
                     # original source (one for all projection)
-                    if server_layer_name in wms_layers.keys():
-                        wmts_source = create_wms_source(server_layer_name)
+                    # Use WMS if layer is not a raster and is the current timestamp (WMS is always current)
+                    if server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
+                            wmts_source = create_wms_source(server_layer_name)
                     else:
                         wmts_source = create_wmts_source(server_layer_name, timestamp)
 
@@ -292,15 +296,20 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                         elif '.swisstlm3d-karte' in wmts_cache_name:
                             cache["image"] = {"resampling_method": "nearest"}
 
+                        layer_title = "%s (%s, source)" % (title, timestamp)
+
+                        if server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
+                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_source_name]}
+                            cache['sources'] = [wmts_source_name]
+                            cache['meta_size'] = [2,2]
+                            cache['meta_buffer'] = 20
+                        else:
+                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_cache_name]}
+
                         mapproxy_config['layers'].append(layer)
                         mapproxy_config['caches'][cache_out_name] = cache
 
-                        layer_title = "%s (%s, source)" % (title, timestamp)
                         ## wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
-                        if server_layer_name in wms_layers.keys():
-                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_source_name]}
-                        else:
-                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_cache_name]}
                         #wmts_layer_current = {'name': wmts_source_name, 'title': "%s ('alias')" % title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
 
                         if timestamp == current_timestamp:
@@ -345,10 +354,10 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     print "Topics: %s" % ",".join(topics)
     print "Layers: %d, timestamps: %d" % (layers_nb, timestamps_nb)
     if USE_S3_CACHE:
-        print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
+        print "Using S3 cache: bucket (MAPPROXY_BUCKET_NAME): %s" % MAPPROXY_BUCKET_NAME
     if MAPPROXY_PROFILE_NAME:
-        print "profile_name=%s" % MAPPROXY_PROFILE_NAME
-    print "WMTS tile source: ", WMTS_BASE_URL
+        print "profile_name (MAPPROXY_PROFILE_NAME): %s" % MAPPROXY_PROFILE_NAME
+    print "WMTS tile source (WMTS_BASE_URL): ", WMTS_BASE_URL
 
 
 if __name__ == '__main__':
