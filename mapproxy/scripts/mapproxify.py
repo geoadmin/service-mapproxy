@@ -106,7 +106,7 @@ def getTopics(service_url=DEFAULT_SERVICE_URL):
     return topics
 
 
-def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
+def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics, max_layers=None):
     layers = []
     timestamps = 0
     h = httplib2.Http()
@@ -117,6 +117,8 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
     layer_list = []
 
     for k in sorted(list(set(js.keys()))):
+        if max_layers is not None and len(layer_list) >= max_layers:
+            break
         cfg = js[k]
 
         try:
@@ -320,12 +322,12 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
     return mapproxy_config
 
 
-def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES):
+def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES, max_layers=None):
 
     if topics is None:
         topics = getTopics(service_url=service_url)
 
-    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(topics=topics)
+    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(topics=topics, max_layers=max_layers)
 
     mapproxy_config = generate_mapproxy_config(layersConfig, services=services)
 
@@ -356,7 +358,8 @@ if __name__ == '__main__':
     parser.add_argument('url', nargs='?', default=DEFAULT_SERVICE_URL, help="Service url to use. Default to 'api3.geo.admin.ch'")
     parser.add_argument('-t', '--topics', nargs='+', help='Use layers from these topics. Default to use all topics from map.geo.admin.ch', required=False)
     parser.add_argument('-s', '--services', nargs='+', default=DEFAULT_SERVICES, help='Activate services from MapProxy. Default to \'demo,wms,wmts\'', required=False)
+    parser.add_argument("-l", "--layers", type=int, default=None, help="Number of layers to use, to ease debugging configuration. Default to use all layers.", required=False)
 
     results = parser.parse_args()
 
-    main(service_url=results.url, topics=results.topics, services=results.services)
+    main(service_url=results.url, topics=results.topics, services=results.services, max_layers=results.layers)
