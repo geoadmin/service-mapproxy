@@ -4,6 +4,7 @@ MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV_OPTS ?= --system-site-packages
 WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
+export WMTS_BASE_URL
 
 
 ## Python interpreter can't have space in path name
@@ -33,6 +34,7 @@ help:
 	@echo "- API_URL                           (current value: $(API_URL))"
 	@echo "- PYTHONVENV_OPTS                   (current value: $(PYTHONVENV_OPTS))"
 	@echo "- WMTS_BASE_URL Source for tiles    (current value: $(WMTS_BASE_URL))"
+	@echo "- MAPPROXY_BUCKET_NAME              (current value: $(MAPPROXY_BUCKET_NAME))"
 	@echo
 
 
@@ -73,7 +75,12 @@ uwsgi: .build-artefacts/python-venv/bin/uwsgi
 	cp scripts/cmd.py .build-artefacts/python-venv/local/lib/python2.7/site-packages/mako/cmd.py
 
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
+ifndef MAPPROXY_BUCKET_NAME
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install mapproxy
+else 
+	$(info Using bucket $(MAPPROXY_BUCKET_NAME))
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
+endif
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
 	touch $@
