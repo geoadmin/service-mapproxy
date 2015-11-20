@@ -47,6 +47,7 @@ LANG = 'de'
 topics = []
 baseTopics = ['api']
 USE_S3_CACHE = False
+wms_layers = None
 
 total_timestamps = 0
 
@@ -77,6 +78,11 @@ if MAPPROXY_BUCKET_NAME:
         USE_S3_CACHE = False
     else:
         USE_S3_CACHE = True
+
+try:
+    from  layers import layers as wms_layers
+except ImportError:
+    pass
 
 
 dict_to_obj = lambda x: (type('JsonObject', (), {k: dict_to_obj(v) for k, v in x.items()})
@@ -201,6 +207,14 @@ def create_wmts_source(server_layer_name, timestamp):
 
     return wmts_source
 
+def create_wms_source(server_layer_name, url="http://wms.geo.admin.ch"):
+    wms_source = {"req": {"layers": server_layer_name, "url": url},
+                  "coverage": {"bbox": [0, 40, 20, 50], "bbox_srs": "EPSG:4326"},
+                  "supported_srs": ["EPSG:21781","EPSG:4326", "EPSG:3857","EPSG:2056"],
+                  "type": "wms"
+                  }
+    return wms_source
+
 
 def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
@@ -245,7 +259,10 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                     dimensions = {'Time': {'default': timestamp, 'values': [timestamp]}}
 
                     # original source (one for all projection)
-                    wmts_source = create_wmts_source(server_layer_name, timestamp)
+                    if server_layer_name in wms_layers.keys():
+                        wmts_source = create_wms_source(server_layer_name)
+                    else:
+                        wmts_source = create_wmts_source(server_layer_name, timestamp)
 
                     wmts_cache = {"sources": [wmts_source_name], "format": "image/%s" % image_format, "grids": ["swisstopo-pixelkarte"], "disable_storage": True}
 
@@ -278,7 +295,10 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                         layer_title = "%s (%s, source)" % (title, timestamp)
                         ## wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
-                        wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_cache_name]}
+                        if server_layer_name in wms_layers.keys():
+                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_source_name]}
+                        else:
+                            wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_cache_name]}
                         #wmts_layer_current = {'name': wmts_source_name, 'title': "%s ('alias')" % title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
 
                         if timestamp == current_timestamp:
