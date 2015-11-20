@@ -47,6 +47,7 @@ LANG = 'de'
 topics = []
 baseTopics = ['api']
 USE_S3_CACHE = False
+USE_WMS_SOURCE = False
 wms_layers = None
 REQUEST_REFERER = "http://mapproxy-s3-template.geo.admin.ch"
 
@@ -71,6 +72,7 @@ basedir = os.path.dirname(os.path.abspath(os.path.join(os.path.abspath(__file__)
 MAPPROXY_PROFILE_NAME = os.environ.get('MAPPROXY_PROFILE_NAME', None)
 MAPPROXY_BUCKET_NAME = os.environ.get('MAPPROXY_BUCKET_NAME', None)
 WMTS_BASE_URL = os.environ.get('WMTS_BASE_URL', DEFAULT_WMTS_BASE_URL)
+WMS_BASE_URL =  os.environ.get('WMS_BASE_URL', None)
 
 if MAPPROXY_BUCKET_NAME:
     try:
@@ -80,11 +82,13 @@ if MAPPROXY_BUCKET_NAME:
     else:
         USE_S3_CACHE = True
 
-try:
-    from  layers import layers as wms_layers
-except ImportError:
-    pass
-
+if WMS_BASE_URL:
+    try:
+        from  layers import layers as wms_layers
+        USE_WMS_SOURCE = True
+    except ImportError:
+        pass
+    
 
 dict_to_obj = lambda x: (type('JsonObject', (), {k: dict_to_obj(v) for k, v in x.items()})
                          if isinstance(x, dict) else x)
@@ -265,7 +269,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                     # original source (one for all projection)
                     # Use WMS if layer is not a raster and is the current timestamp (WMS is always current)
-                    if server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
+                    if USE_WMS_SOURCE and server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
                             wmts_source = create_wms_source(server_layer_name)
                     else:
                         wmts_source = create_wmts_source(server_layer_name, timestamp)
@@ -298,7 +302,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                         layer_title = "%s (%s, source)" % (title, timestamp)
 
-                        if server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
+                        if USE_WMS_SOURCE and server_layer_name in wms_layers.keys() and timestamp == current_timestamp:
                             wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_source_name]}
                             cache['sources'] = [wmts_source_name]
                             cache['meta_size'] = [2,2]
@@ -358,6 +362,8 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     if MAPPROXY_PROFILE_NAME:
         print "profile_name (MAPPROXY_PROFILE_NAME): %s" % MAPPROXY_PROFILE_NAME
     print "WMTS tile source (WMTS_BASE_URL): ", WMTS_BASE_URL
+    if USE_WMS_SOURCE:
+        print "Using WMS %s source for vector layers" % WMS_BASE_URL
 
 
 if __name__ == '__main__':
