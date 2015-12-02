@@ -52,7 +52,11 @@ total_timestamps = 0
 
 DEFAULT_SERVICE_URL = 'https://api3.geo.admin.ch'
 
+DEFAULT_EPSG_21781_ZOOM_LEVELS = 26
+
 DEFAULT_WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
+
+EPSG_21781_RESOlUTIONS = [4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250, 1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5, 0.25, 0.1]
 
 DEFAULT_SERVICES = ['demo', 'wms', 'wmts']
 EPSG_CODES = ['4258',  # ETRS89 (source: epsg-registry.org, but many WMTS client use 4852)
@@ -131,6 +135,7 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
                 cfg['timestamps'] = None
             else:
                 timestamps += len(cfg['timestamps'])
+
             if USE_SERVERNAME_AS_BODID and cfg['bodLayerId'] not in layer_list:
                 layer = dict_to_obj(cfg)
                 layers.append(layer)
@@ -170,6 +175,25 @@ def get_mapproxy_template_config(services):
     return mapproxy_config
 
 
+def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 28]):
+    grids = {}
+    tpl = {"res": [],
+           "bbox": [420000, 30000, 900000, 350000],
+           "bbox_srs": "EPSG:21781",
+           "srs": "EPSG:21781",
+           "origin": "nw",
+           "stretch_factor": 1.0
+           }
+
+    for i in rng:
+        if i <= len(EPSG_21781_RESOlUTIONS):
+            g = dict(tpl)
+            g["res"] = EPSG_21781_RESOlUTIONS[:i]
+            grids["epsg_21781_%s" % i] = g
+
+    return grids
+
+
 def create_wmts_source(server_layer_name, timestamp):
     # original source (one for all projection)
     wmts_url = WMTS_BASE_URL + "/1.0.0/" + server_layer_name + "/default/" + timestamp + "/21781/%(z)d/%(y)d/%(x)d.%(format)s"
@@ -206,6 +230,10 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
     mapproxy_config = get_mapproxy_template_config(services)
 
+    grids = create_grids()
+
+    mapproxy_config['grids'].update(grids)
+
     if USE_S3_CACHE:
         mapproxy_config['globals']['cache']['bucket_name'] = MAPPROXY_BUCKET_NAME
         mapproxy_config['globals']['cache']['tile_lock_dir'] = '/tmp/mapproxy/locks'
@@ -225,6 +253,11 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                 bod_layer_id = layersConfig.bodLayerId
                 server_layer_name = layersConfig.serverLayerName
                 logger.info("Layer: %d - %s" % (idx + 1, bod_layer_id))
+
+                if hasattr(layersConfig, 'resolutions'):
+                    max_level = len(layersConfig.resolutions)
+                else:
+                    max_level = DEFAULT_EPSG_21781_ZOOM_LEVELS
 
                 timestamps = layersConfig.timestamps
                 current_timestamp = timestamps[0]
@@ -246,8 +279,9 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                     # original source (one for all projection)
                     wmts_source = create_wmts_source(server_layer_name, timestamp)
+                    wmts_source_grid = "epsg_21781_%s" % (max_level)
 
-                    wmts_cache = {"sources": [wmts_source_name], "format": "image/%s" % image_format, "grids": ["swisstopo-pixelkarte"], "disable_storage": True}
+                    wmts_cache = {"sources": [wmts_source_name], "format": "image/%s" % image_format, "grids": [wmts_source_grid], "disable_storage": True}
 
                     if '.swissimage' in wmts_cache_name:
                         wmts_source["grid"] = "swisstopo-swissimage"
