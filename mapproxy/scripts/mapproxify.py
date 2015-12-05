@@ -263,8 +263,10 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                 current_timestamp = timestamps[0]
                 if bod_layer_id == 'ch.swisstopo.zeitreihen':
                     image_format = 'png'
+                    image_format_out = 'jpeg'
                 else:
                     image_format = layersConfig.format
+                    image_format_out = image_format
 
                 current_timestamps[bod_layer_id] = current_timestamp
 
@@ -294,7 +296,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                         # layer config: cache_out
                         #layer = {'name': layer_name, 'title': "%s (%s)" % (title, timestamp), 'dimensions': dimensions, 'sources': [cache_out_name]}
                         layer = {'name': layer_name, 'title': "%s (%s)" % (title, timestamp), 'sources': [cache_out_name]}
-                        cache = {"sources": [wmts_cache_name], "format": "image/%s" % image_format, "grids": [grid_name], "disable_storage": True, "meta_size": [1, 1], "meta_buffer": 0}
+                        cache = {"sources": [wmts_cache_name], "format": "image/%s" % image_format_out, "grids": [grid_name], "disable_storage": True, "meta_size": [1, 1], "meta_buffer": 0}
                         if USE_S3_CACHE:
                             cache['disable_storage'] = False
 
