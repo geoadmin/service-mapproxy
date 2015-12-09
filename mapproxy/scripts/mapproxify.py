@@ -50,7 +50,8 @@ USE_S3_CACHE = False
 
 total_timestamps = 0
 
-DEFAULT_SERVICE_URL = 'https://api3.geo.admin.ch'
+DEFAULT_SERVICE_URL = os.environ.get('DEFAULT_SERVICE_URL', 'https://api3.geo.admin.ch')
+logger.info('Using %s service url.' % DEFAULT_SERVICE_URL)
 
 DEFAULT_EPSG_21781_ZOOM_LEVELS = 26
 

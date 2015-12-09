@@ -52,3 +52,8 @@ Serve MapProxy:
     Upload the mapproxy.yaml to S3. This action will cause MapProxy to restart
 
     $ make deploydev
+
+# Genertate config from dev, int or prod env (default to prod)
+
+    $ export DEFAULT_SERVICE_URL=http://foo.ch
+    $ make config 
