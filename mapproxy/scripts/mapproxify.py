@@ -56,7 +56,36 @@ DEFAULT_EPSG_21781_ZOOM_LEVELS = 26
 
 DEFAULT_WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
 
-EPSG_21781_RESOlUTIONS = [4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250, 1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5, 0.25, 0.1]
+EPSG_21781_RESOlUTIONS = [
+    4000,
+    3750,
+    3500,
+    3250,
+    3000,
+    2750,
+    2500,
+    2250,
+    2000,
+    1750,
+    1500,
+    1250,
+    1000,
+    750,
+    650,
+    500,
+    250,
+    100,
+    50,
+    20,
+    10,
+    5,
+    2.5,
+    2,
+    1.5,
+    1,
+    0.5,
+    0.25,
+    0.1]
 
 DEFAULT_SERVICES = ['demo', 'wms', 'wmts']
 EPSG_CODES = ['4258',  # ETRS89 (source: epsg-registry.org, but many WMTS client use 4852)
@@ -68,7 +97,11 @@ USE_SERVERNAME_AS_BODID = True
 current_timestamps = {}
 
 
-basedir = os.path.dirname(os.path.abspath(os.path.join(os.path.abspath(__file__), '../..')))
+basedir = os.path.dirname(
+    os.path.abspath(
+        os.path.join(
+            os.path.abspath(__file__),
+            '../..')))
 
 MAPPROXY_PROFILE_NAME = os.environ.get('MAPPROXY_PROFILE_NAME', None)
 MAPPROXY_BUCKET_NAME = os.environ.get('MAPPROXY_BUCKET_NAME', None)
@@ -109,7 +142,8 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
     timestamps = 0
     h = httplib2.Http()
     url = service_url + '/rest/services/all/MapServer/layersConfig'
-    (resp, content) = h.request(url, "GET", headers={'cache-control': 'no-cache'})
+    (resp, content) = h.request(url, "GET",
+     headers={'cache-control': 'no-cache'})
 
     js = json.loads(content)
     layer_list = []
@@ -196,7 +230,8 @@ def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 28]):
 
 def create_wmts_source(server_layer_name, timestamp):
     # original source (one for all projection)
-    wmts_url = WMTS_BASE_URL + "/1.0.0/" + server_layer_name + "/default/" + timestamp + "/21781/%(z)d/%(y)d/%(x)d.%(format)s"
+    wmts_url = WMTS_BASE_URL + "/1.0.0/" + server_layer_name + \
+        "/default/" + timestamp + "/21781/%(z)d/%(y)d/%(x)d.%(format)s"
 
     wmts_source = {"url": wmts_url,
                    "type": "tile",
@@ -235,10 +270,13 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
     mapproxy_config['grids'].update(grids)
 
     if USE_S3_CACHE:
-        mapproxy_config['globals']['cache']['bucket_name'] = MAPPROXY_BUCKET_NAME
-        mapproxy_config['globals']['cache']['tile_lock_dir'] = '/tmp/mapproxy/locks'
+        mapproxy_config['globals']['cache'][
+            'bucket_name'] = MAPPROXY_BUCKET_NAME
+        mapproxy_config['globals']['cache'][
+            'tile_lock_dir'] = '/tmp/mapproxy/locks'
     if MAPPROXY_PROFILE_NAME:
-        mapproxy_config['globals']['cache']['s3_profile_name'] = MAPPROXY_PROFILE_NAME
+        mapproxy_config['globals']['cache'][
+            's3_profile_name'] = MAPPROXY_PROFILE_NAME
 
     grid_names = []
 
@@ -273,17 +311,27 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                 title = bod_layer_id
 
                 for timestamp in timestamps:
-                    wmts_source_name = "%s_%s_source" % (bod_layer_id, timestamp)
+                    wmts_source_name = "%s_%s_source" % (
+                        bod_layer_id, timestamp)
                     wmts_cache_name = "%s_%s_cache" % (bod_layer_id, timestamp)
                     #layer_source_name = "%s_%s_source" % (bod_layer_id, timestamp)
 
-                    dimensions = {'Time': {'default': timestamp, 'values': [timestamp]}}
+                    dimensions = {
+                        'Time': {
+                            'default': timestamp,
+                            'values': [timestamp]}}
 
                     # original source (one for all projection)
-                    wmts_source = create_wmts_source(server_layer_name, timestamp)
+                    wmts_source = create_wmts_source(
+                        server_layer_name, timestamp)
                     wmts_source_grid = "epsg_21781_%s" % (max_level)
 
-                    wmts_cache = {"sources": [wmts_source_name], "format": "image/%s" % image_format, "grids": [wmts_source_grid], "disable_storage": True}
+                    wmts_cache = {
+                        "sources": [wmts_source_name],
+                        "format": "image/%s" %
+                        image_format,
+                        "grids": [wmts_source_grid],
+                        "disable_storage": True}
 
                     if '.swissimage' in wmts_cache_name:
                         wmts_source["grid"] = "swisstopo-swissimage"
@@ -291,17 +339,33 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                     for epsg_code in EPSG_CODES:
                         grid_name = "epsg_%s" % epsg_code
-                        cache_out_name = "%s_%s_%s_cache_out" % (bod_layer_id, timestamp, grid_name)
-                        layer_name = "%s_%s_%s" % (bod_layer_id, timestamp, grid_name)
+                        cache_out_name = "%s_%s_%s_cache_out" % (
+                            bod_layer_id, timestamp, grid_name)
+                        layer_name = "%s_%s_%s" % (
+                            bod_layer_id, timestamp, grid_name)
                         # layer config: cache_out
                         #layer = {'name': layer_name, 'title': "%s (%s)" % (title, timestamp), 'dimensions': dimensions, 'sources': [cache_out_name]}
-                        layer = {'name': layer_name, 'title': "%s (%s)" % (title, timestamp), 'sources': [cache_out_name]}
-                        cache = {"sources": [wmts_cache_name], "format": "image/%s" % image_format_out, "grids": [grid_name], "disable_storage": True, "meta_size": [1, 1], "meta_buffer": 0}
+                        layer = {'name': layer_name, 'title': "%s (%s)" % (
+                            title, timestamp), 'sources': [cache_out_name]}
+                        cache = {
+                            "sources": [wmts_cache_name],
+                            "format": "image/%s" %
+                            image_format_out,
+                            "grids": [grid_name],
+                            "disable_storage": True,
+                            "meta_size": [
+                                1,
+                                1],
+                            "meta_buffer": 0}
                         if USE_S3_CACHE:
                             cache['disable_storage'] = False
 
-                            cache_dir = '/1.0.0/%s/default/%s/%s/' % (server_layer_name, timestamp, epsg_code)
-                            s3_cache = {"cache_dir": cache_dir, "type": "s3", "directory_layout": "tms"}
+                            cache_dir = '/1.0.0/%s/default/%s/%s/' % (
+                                server_layer_name, timestamp, epsg_code)
+                            s3_cache = {
+                                "cache_dir": cache_dir,
+                                "type": "s3",
+                                "directory_layout": "tms"}
                             cache['cache'] = s3_cache
 
                         if '.swissimage' in wmts_cache_name:
@@ -314,16 +378,26 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                         layer_title = "%s (%s, source)" % (title, timestamp)
                         ## wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
-                        wmts_layer = {'name': wmts_source_name, 'title': layer_title, 'sources': [wmts_cache_name]}
+                        wmts_layer = {
+                            'name': wmts_source_name,
+                            'title': layer_title,
+                            'sources': [wmts_cache_name]}
                         #wmts_layer_current = {'name': wmts_source_name, 'title': "%s ('alias')" % title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
 
                         if timestamp == current_timestamp:
                             #layer_current = {'name': bod_layer_id, 'title': "%s ('current')" % title, 'dimensions': dimensions, 'sources': [wmts_cache_name]}
-                            layer_current = {'name': bod_layer_id, 'title': "%s ('current')" % title, 'sources': [wmts_cache_name]}
+                            layer_current = {
+                                'name': bod_layer_id,
+                                'title': "%s ('current')" % title,
+                                'sources': [wmts_cache_name]}
                             mapproxy_config['layers'].append(layer_current)
 
                         if DEBUG:
-                            logger.info(json.dumps(layer, indent=4, sort_keys=True))
+                            logger.info(
+                                json.dumps(
+                                    layer,
+                                    indent=4,
+                                    sort_keys=True))
 
                         mapproxy_config['layers'].append(wmts_layer)
                         mapproxy_config['caches'][wmts_cache_name] = wmts_cache
@@ -336,7 +410,8 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
     return mapproxy_config
 
 
-def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES):
+def main(service_url=DEFAULT_SERVICE_URL,
+         topics=None, services=DEFAULT_SERVICES):
 
     if topics is None:
         topics = getTopics(service_url=service_url)
@@ -352,7 +427,13 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     logger.info("Writing mapproxy/mapproxy.yaml")
     with open('mapproxy/mapproxy.yaml', 'w') as o:
         o.write("# This is a generated file. Do not edit.\n\n")
-        o.write(yaml.safe_dump(mapproxy_config, canonical=False, explicit_start=False, default_flow_style=False, encoding=None))
+        o.write(
+            yaml.safe_dump(
+                mapproxy_config,
+                canonical=False,
+                explicit_start=False,
+                default_flow_style=False,
+                encoding=None))
 
     print "\nService url: %s" % service_url
     print "Topics: %s" % ",".join(topics)
@@ -368,10 +449,28 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Generate a MapProxy configuration file from map.geo.admin.ch topics and layersConfig services',
                                      epilog="Usage:\nmapproxify.py  http://mf-chsdi3.dev.bgdi.ch --topics api gewiss")
-    parser.add_argument('url', nargs='?', default=DEFAULT_SERVICE_URL, help="Service url to use. Default to 'api3.geo.admin.ch'")
-    parser.add_argument('-t', '--topics', nargs='+', help='Use layers from these topics. Default to use all topics from map.geo.admin.ch', required=False)
-    parser.add_argument('-s', '--services', nargs='+', default=DEFAULT_SERVICES, help='Activate services from MapProxy. Default to \'demo,wms,wmts\'', required=False)
+    parser.add_argument(
+        'url',
+        nargs='?',
+        default=DEFAULT_SERVICE_URL,
+        help="Service url to use. Default to 'api3.geo.admin.ch'")
+    parser.add_argument(
+        '-t',
+        '--topics',
+        nargs='+',
+        help='Use layers from these topics. Default to use all topics from map.geo.admin.ch',
+        required=False)
+    parser.add_argument(
+        '-s',
+        '--services',
+        nargs='+',
+        default=DEFAULT_SERVICES,
+        help='Activate services from MapProxy. Default to \'demo,wms,wmts\'',
+        required=False)
 
     results = parser.parse_args()
 
-    main(service_url=results.url, topics=results.topics, services=results.services)
+    main(
+        service_url=results.url,
+        topics=results.topics,
+        services=results.services)
