@@ -37,3 +37,18 @@ Testing:
     Running the local uWSGI server:
 
     $ .build-artefacts/python-venv/bin/uwsgi mapproxy.ini
+
+Serve MapProxy:
+
+    http://mapproxy.org/docs/nightly/mapproxy_util.html#serve-develop
+
+# Update config cycle
+
+    Make sure the variable MAPPROXY_CONFIG_BASE_PATH and your personal aws credentials are set.
+    Then use the following command to generate the mapproxy config:
+
+    $ make config
+
+    Upload the mapproxy.yaml to S3. This action will cause MapProxy to restart
+
+    $ make deploydev
