@@ -1,2 +1,0 @@
-export DEPLOY_TARGET=dev
-export APACHE_BASE_PATH=
