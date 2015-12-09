@@ -349,13 +349,12 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
         print json.dumps(layersConfig, sort_keys=False, indent=4)
 
     # generate the mapproxy.yaml config file
-    logger.info("Writing mapproxy.yaml")
+    logger.info("Writing mapproxy/mapproxy.yaml")
     with open('mapproxy/mapproxy.yaml', 'w') as o:
         o.write("# This is a generated file. Do not edit.\n\n")
         o.write(yaml.safe_dump(mapproxy_config, canonical=False, explicit_start=False, default_flow_style=False, encoding=None))
 
-    print
-    print "Service url: %s" % service_url
+    print "\nService url: %s" % service_url
     print "Topics: %s" % ",".join(topics)
     print "Layers: %d, timestamps: %d" % (layers_nb, timestamps_nb)
     if USE_S3_CACHE:
