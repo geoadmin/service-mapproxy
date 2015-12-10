@@ -33,13 +33,31 @@ layers:
   - name: osm
     title: OpenStreetMap
     sources: [osm_cache]
-  - name: "ch.kantone.cadastralwebmap-farbe_current"
-    title: "CadastralWebMap"
-    sources: [ch.kantone.cadastralwebmap-farbe_wms_cache]
-    dimensions:
-       Time:
-          default: "current"
-          values: ["current"]
+  - name: "ch.kantone.cadastralwebmap-farbe_current_epsg_21781"
+    title: "CadastralWebMap (Current, 21781)"
+    sources:
+      - ch.kantone.cadastralwebmap-farbe_epsg_21781_cache_out
+  - name: "ch.kantone.cadastralwebmap-farbe_current_epsg_2056"
+    title: "CadastralWebMap (Current, 2056)"
+    sources:
+      - ch.kantone.cadastralwebmap-farbe_epsg_2056_cache_out
+  - name: "ch.kantone.cadastralwebmap-farbe_current_epsg_4258"
+    title: "CadastralWebMap (Current, 4258)"
+    sources:
+      - ch.kantone.cadastralwebmap-farbe_epsg_4258_cache_out
+  - name: "ch.kantone.cadastralwebmap-farbe_current_epsg_3857"
+    title: "CadastralWebMap (Current, 3857)"
+    sources:
+      - ch.kantone.cadastralwebmap-farbe_epsg_3857_cache_out
+  - name: "ch.kantone.cadastralwebmap-farbe_current_epsg_4326"
+    title: "CadastralWebMap (Current, 4356)"
+    sources:
+      - ch.kantone.cadastralwebmap-farbe_epsg_4326_cache_out
+  - name: ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326
+    title: SwissTLM3D Color - 3D edition (20140401)
+    sources:
+      - ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326_cache_out
+
   - name: ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_epsg_4326
     title: SwissTLM3D Color - 3D edition (20140401)
     sources:
@@ -65,6 +83,13 @@ sources:
     req:
       url: http://wms.cadastralwebmap.ch/WMS
       layers: cm_wms
+    coverage:
+      bbox:
+      - 0
+      - 40
+      - 20
+      - 50
+      bbox_srs: EPSG:4326
   ch.swisstopo.swisstlm3d-karte-farbe.3d_20150401_source:
     coverage:
       bbox:
@@ -105,12 +130,68 @@ sources:
     url: http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com/1.0.0/ch.swisstopo.swisstlm3d-karte-grau.3d/default/20150401/4326/%(z)d/%(y)d/%(x)d.%(format)s
 
 caches:
-  ch.kantone.cadastralwebmap-farbe_wms_cache:
+  ch.kantone.cadastralwebmap-farbe_cache:
+    disable_storage: true
+    format: image/png
+    grids:
+    - epsg_21781
+    sources:
+    - ch.kantone.cadastralwebmap-farbe_wms_source
+  ch.kantone.cadastralwebmap-farbe_epsg_21781_cache_out:
      disable_storage: true
      format: image/png
-     meta_size: [1, 1]
-     grids: [epsg_21781, epsg_4258, epsg_4326, epsg_2056, epsg_3857]
-     sources: [ch.kantone.cadastralwebmap-farbe_wms_source]
+     grids:
+     - epsg_21781
+     meta_buffer: 0
+     meta_size:
+     - 2
+     - 2
+     sources:
+     - ch.kantone.cadastralwebmap-farbe_cache
+  ch.kantone.cadastralwebmap-farbe_epsg_2056_cache_out:
+     disable_storage: true
+     format: image/png
+     grids:
+     - epsg_2056
+     meta_buffer: 0
+     meta_size:
+     - 2
+     - 2
+     sources:
+     - ch.kantone.cadastralwebmap-farbe_cache
+  ch.kantone.cadastralwebmap-farbe_epsg_3857_cache_out:
+     disable_storage: true
+     format: image/png
+     grids:
+     - epsg_3857
+     meta_buffer: 0
+     meta_size:
+     - 2
+     - 2
+     sources:
+     - ch.kantone.cadastralwebmap-farbe_cache
+  ch.kantone.cadastralwebmap-farbe_epsg_4258_cache_out:
+     disable_storage: true
+     format: image/png
+     grids:
+     - epsg_4258
+     meta_buffer: 0
+     meta_size:
+     - 2
+     - 2
+     sources:
+     - ch.kantone.cadastralwebmap-farbe_cache
+  ch.kantone.cadastralwebmap-farbe_epsg_4326_cache_out:
+     disable_storage: true
+     format: image/png
+     grids:
+     - epsg_4326
+     meta_buffer: 0
+     meta_size:
+     - 2
+     - 2
+     sources:
+     - ch.kantone.cadastralwebmap-farbe_cache
   osm_cache:
     grids: [global_mercator_osm]
     sources: [osm_tms]
