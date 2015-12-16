@@ -175,7 +175,7 @@ def get_mapproxy_template_config(services):
     return mapproxy_config
 
 
-def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 28]):
+def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
     grids = {}
     tpl = {"res": [],
            "bbox": [420000, 30000, 900000, 350000],
@@ -341,7 +341,7 @@ def main(service_url=DEFAULT_SERVICE_URL, topics=None, services=DEFAULT_SERVICES
     if topics is None:
         topics = getTopics(service_url=service_url)
 
-    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(topics=topics)
+    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(service_url=service_url, topics=topics)
 
     mapproxy_config = generate_mapproxy_config(layersConfig, services=services)
 
