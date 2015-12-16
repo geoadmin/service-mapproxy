@@ -50,7 +50,7 @@ USE_S3_CACHE = False
 
 total_timestamps = 0
 
-DEFAULT_SERVICE_URL = os.environ.get('DEFAULT_SERVICE_URL', 'https://api3.geo.admin.ch')
+DEFAULT_SERVICE_URL = os.environ.get('DEFAULT_SERVICE_URL', 'http://api3.geo.admin.ch')
 logger.info('Using %s service url.' % DEFAULT_SERVICE_URL)
 
 DEFAULT_EPSG_21781_ZOOM_LEVELS = 26
@@ -450,6 +450,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Generate a MapProxy configuration file from map.geo.admin.ch topics and layersConfig services',
                                      epilog="Usage:\nmapproxify.py  http://mf-chsdi3.dev.bgdi.ch --topics api gewiss")
+
     parser.add_argument(
         'url',
         nargs='?',

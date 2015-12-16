@@ -55,5 +55,4 @@ Serve MapProxy:
 
 # Genertate config from dev, int or prod env (default to prod)
 
-    $ export DEFAULT_SERVICE_URL=http://foo.ch
-    $ make config 
+    $ make config API_URL=http://mf-chsdi3.int.bgdi.ch
