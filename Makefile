@@ -1,16 +1,19 @@
-APACHE_BASE_PATH ?= /$(shell id -un)
+USER_NAME ?= $(shell id -un)
+APACHE_BASE_PATH ?= /$(USER_NAME)
 APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
-PYTHONVENV_OPTS ?= --system-site-packages
+PYTHONVENV ?= .build-artefacts/python-venv
+PYTHONVENV_OPTS ?= 
 WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
+MAPPROXY_CONFIG_BASE_PATH ?= 
 export WMTS_BASE_URL
 
 
 ## Python interpreter can't have space in path name
 ## So prepend all python scripts with python cmd
 ## See: https://bugs.launchpad.net/virtualenv/+bug/241581/comments/11
-PYTHON_CMD=.build-artefacts/python-venv/bin/python
+PYTHON_CMD=$(PYTHONVENV)/bin/python
 
 
 .PHONY: help
@@ -25,16 +28,22 @@ help:
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
+	@echo "- deploydev        Deploy local mapproxy.yaml to dev"
+	@echo "- deployint        Deploy local mapproxy.yaml to int"
+	@echo "- deployprod       Deploy local mapproxy.yaml to prod"
 	@echo "- help             Display this help"
 	@echo
 	@echo "Variables:"
 	@echo
+	@echo "- USER_NAME                         (current value: $(USER_NAME)"
 	@echo "- APACHE_BASE_PATH Base path        (current value: $(APACHE_BASE_PATH))"
 	@echo "- APACHE_BASE_DIRECTORY             (current value: $(APACHE_BASE_DIRECTORY))"
 	@echo "- API_URL                           (current value: $(API_URL))"
+	@echo "- PYTHONVENV                        (current value: $(PYTHONVENV)"
 	@echo "- PYTHONVENV_OPTS                   (current value: $(PYTHONVENV_OPTS))"
 	@echo "- WMTS_BASE_URL Source for tiles    (current value: $(WMTS_BASE_URL))"
 	@echo "- MAPPROXY_BUCKET_NAME              (current value: $(MAPPROXY_BUCKET_NAME))"
+	@echo "- MAPPROXY_CONFIG_BASE_PATH         (current value: $(MAPPROXY_CONFIG_BAS_PATH))"
 	@echo
 
 
@@ -52,51 +61,65 @@ config: .build-artefacts/python-venv
 	touch $@
 
 .PHONY: mapproxy
-mapproxy: .build-artefacts/python-venv/bin/mapproxy \
+mapproxy: $(PYTHONVENV)/bin/mapproxy \
 	.build-artefacts/python-venv/bin/mako-render \
 	mapproxy/wsgi.py \
 	mapproxy.ini
 
 .PHONY: uwsgi
-uwsgi: .build-artefacts/python-venv/bin/uwsgi
+uwsgi: $(PYTHONVENV)/bin/uwsgi
+
+.PHONY: deploydev
+deploydev:
+	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml; fi );
+
+.PHONY: deployint
+deployint:
+	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml; fi );
+
+.PHONY: deployprod
+deployprod:
+	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
 
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts
 	virtualenv ${PYTHONVENV_OPTS}  $@
 
-
-
 .build-artefacts/python-venv/bin/mako-render: .build-artefacts/python-venv
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "Mako==1.0.0"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "Mako==1.0.0"
 	touch $@
-	@ if [[ ! -e .build-artefacts/python-venv/local ]]; then \
-	    ln -s . .build-artefacts/python-venv/local; \
+	@ if [[ ! -e $(PYTHONVENV)/local ]]; then \
+	    ln -s . $(PYTHONVENV)/local; \
 	fi
-	cp scripts/cmd.py .build-artefacts/python-venv/local/lib/python2.7/site-packages/mako/cmd.py
+	cp scripts/cmd.py $(PYTHONVENV)/local/lib/python2.7/site-packages/mako/cmd.py
 
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
 ifndef MAPPROXY_BUCKET_NAME
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install mapproxy
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install mapproxy
 else 
 	$(info Using bucket $(MAPPROXY_BUCKET_NAME))
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 endif
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "webob"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "awscli"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "httplib2==0.9.2"
 	touch $@
 
 .build-artefacts/python-venv/bin/uwsgi: .build-artefacts/python-venv
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "uwsgi==2.0.11"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "uwsgi==2.0.11"
 	touch $@
 
 apache/app.conf: apache/app.mako-dot-conf 
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/mako-render \
+	${PYTHON_CMD} $(PYTHONVENV)/bin/mako-render \
 		--var "apache_base_directory=$(APACHE_BASE_DIRECTORY)" \
 		--var "modwsgi_user=$(MODWSGI_USER)" \
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
 mapproxy/application.py:  mapproxy/application-dot-py
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/mako-render \
+	${PYTHON_CMD} $(PYTHONVENV)/bin/mako-render \
 		--var "apache_base_directory=$(APACHE_BASE_DIRECTORY)" \
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
@@ -104,7 +127,7 @@ mapproxy/wsgi.py: mapproxy/createWsgi.py
 	  ${PYTHON_CMD} mapproxy/createWsgi.py 
 
 mapproxy.ini:  mapproxy-dot-ini
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/mako-render \
+	${PYTHON_CMD} $(PYTHONVENV)/bin/mako-render \
 		--var "apache_base_directory=$(APACHE_BASE_DIRECTORY)" \
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
