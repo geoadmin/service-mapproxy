@@ -210,7 +210,7 @@ def get_mapproxy_template_config(services):
     return mapproxy_config
 
 
-def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 28]):
+def create_grids(rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
     grids = {}
     tpl = {"res": [],
            "bbox": [420000, 30000, 900000, 350000],
@@ -224,7 +224,7 @@ def create_grids(rng=[19, 20, 21, 22, 23, 24, 25, 26, 28]):
         if i <= len(EPSG_21781_RESOlUTIONS):
             g = dict(tpl)
             g["res"] = EPSG_21781_RESOlUTIONS[:i]
-            grids["epsg_21781_%s" % i] = g
+            grids["epsg_21781_%s" % (i-1)] = g
 
     return grids
 
@@ -294,15 +294,19 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                 logger.info("Layer: %d - %s" % (idx + 1, bod_layer_id))
 
                 if hasattr(layersConfig, 'resolutions'):
-                    max_level = len(layersConfig.resolutions)
+                    max_level = len(layersConfig.resolutions) - 1
                 else:
                     max_level = DEFAULT_EPSG_21781_ZOOM_LEVELS
 
                 timestamps = layersConfig.timestamps
                 current_timestamp = timestamps[0]
+                
+                # special cases
                 if bod_layer_id == 'ch.swisstopo.zeitreihen':
                     image_format = 'png'
                     image_format_out = 'jpeg'
+                elif 'ch.swisstopo.swisstlm3d' in bod_layer_id:
+                    max_level = 26
                 else:
                     image_format = layersConfig.format
                     image_format_out = image_format
