@@ -35,7 +35,9 @@ import argparse
 import sys
 import yaml
 import json
-import httplib2
+from requests.packages.urllib3.util import Retry
+from requests.adapters import HTTPAdapter
+from requests import Session, exceptions
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -82,15 +84,19 @@ if MAPPROXY_BUCKET_NAME:
 dict_to_obj = lambda x: (type('JsonObject', (), {k: dict_to_obj(v) for k, v in x.items()})
                          if isinstance(x, dict) else x)
 
+def getSession():
+    s = Session()
+    s.mount('http://', HTTPAdapter(max_retries=Retry(total=5)))
+
+    return s
 
 def getTopics(service_url=DEFAULT_SERVICE_URL):
-    h = httplib2.Http()
+    s = getSession()
     url = service_url + '/rest/services'
-    (resp, content) = h.request(url, "GET",
-                                headers={'cache-control': 'no-cache'})
+    r = s.get(url, headers={'cache-control': 'no-cache'})
 
     topics = []
-    js = json.loads(content)
+    js = r.json()
     try:
         topics = [t.get('id') for t in js.get('topics')]
         topics.extend(baseTopics)
@@ -103,11 +109,11 @@ def getTopics(service_url=DEFAULT_SERVICE_URL):
 def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
     layers = []
     timestamps = 0
-    h = httplib2.Http()
+    s = getSession()
     url = service_url + '/rest/services/all/MapServer/layersConfig'
-    (resp, content) = h.request(url, "GET", headers={'cache-control': 'no-cache'})
+    r = s.get(url, headers={'cache-control': 'no-cache'})
 
-    js = json.loads(content)
+    js = r.json()
     layer_list = []
 
     for k in sorted(list(set(js.keys()))):

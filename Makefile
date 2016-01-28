@@ -73,7 +73,7 @@ uwsgi: .build-artefacts/python-venv/bin/uwsgi
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "webob"
-	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "httplib2==0.9.2"
+	${PYTHON_CMD} .build-artefacts/python-venv/bin/pip install "requests==2.8.1"
 	touch $@
 
 .build-artefacts/python-venv/bin/uwsgi: .build-artefacts/python-venv
