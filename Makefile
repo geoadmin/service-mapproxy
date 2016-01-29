@@ -6,7 +6,7 @@ API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV ?= .build-artefacts/python-venv
 PYTHONVENV_OPTS ?= 
 WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
-MAPPROXY_CONFIG_BASE_PATH ?= 
+MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy 
 export WMTS_BASE_URL
 
 
