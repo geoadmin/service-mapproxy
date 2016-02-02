@@ -421,7 +421,7 @@ def main(service_url=DEFAULT_SERVICE_URL,
     if topics is None:
         topics = getTopics(service_url=service_url)
 
-    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(topics=topics)
+    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(service_url=service_url, topics=topics)
 
     mapproxy_config = generate_mapproxy_config(layersConfig, services=services)
 
