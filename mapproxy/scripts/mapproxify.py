@@ -36,6 +36,8 @@ import sys
 import yaml
 import json
 import httplib2
+from datetime import datetime
+
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -420,7 +422,7 @@ def main(service_url=DEFAULT_SERVICE_URL,
 
     if topics is None:
         topics = getTopics(service_url=service_url)
-
+    build_date = datetime.now()
     layers_nb, timestamps_nb, layersConfig = getLayersConfigs(service_url=service_url, topics=topics)
 
     mapproxy_config = generate_mapproxy_config(layersConfig, services=services)
@@ -432,6 +434,10 @@ def main(service_url=DEFAULT_SERVICE_URL,
     logger.info("Writing mapproxy/mapproxy.yaml")
     with open('mapproxy/mapproxy.yaml', 'w') as o:
         o.write("# This is a generated file. Do not edit.\n\n")
+        o.write("# Configured using service url: %s\n" % service_url)
+        o.write("# Topics: %s\n" % ",".join(topics))
+        o.write("# Layers: %d and %d timestamps\n" % (layers_nb, timestamps_nb))
+        o.write("# Build time: %s\n\n" % build_date.isoformat("T"))
         o.write(
             yaml.safe_dump(
                 mapproxy_config,
@@ -447,6 +453,7 @@ def main(service_url=DEFAULT_SERVICE_URL,
         print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
     if MAPPROXY_PROFILE_NAME:
         print "profile_name=%s" % MAPPROXY_PROFILE_NAME
+        print "DO NOT DEPLOY THIS FILE.\nUsing profile will break the autoscaling cluster"
     print "WMTS tile source: ", WMTS_BASE_URL
 
 
