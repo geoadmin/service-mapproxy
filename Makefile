@@ -1,4 +1,6 @@
+SHELL = /bin/bash
 USER_NAME ?= $(shell id -un)
+PROFILE_NAME ?= $(USER_NAME)_aws_admin
 APACHE_BASE_PATH ?= /$(USER_NAME)
 APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
@@ -6,7 +8,8 @@ API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV ?= .build-artefacts/python-venv
 PYTHONVENV_OPTS ?= 
 WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
-MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy 
+MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy
+RANDOM_MAPPROXY_FILE="mapproxy.$$rand.yaml"
 export WMTS_BASE_URL
 
 
@@ -28,6 +31,9 @@ help:
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
+	@echo "- diffdev          Display diff between local mapproxy.yaml and config on S3 dev"
+	@echo "- diffint          Display diff between local mapproxy.yaml and config on S3 int"
+	@echo "- diffprod         Display diff between local mapproxy.yamland config on S3 prod"
 	@echo "- deploydev        Deploy local mapproxy.yaml to dev"
 	@echo "- deployint        Deploy local mapproxy.yaml to int"
 	@echo "- deployprod       Deploy local mapproxy.yaml to prod"
@@ -69,20 +75,44 @@ mapproxy: $(PYTHONVENV)/bin/mapproxy \
 .PHONY: uwsgi
 uwsgi: $(PYTHONVENV)/bin/uwsgi
 
+.PHONY: diffdev
+diffdev:
+	if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; \
+		then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
+	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml  /tmp/$$rand  && \
+		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
+	fi ;  
+
+.PHONY: diffint
+diffint:
+	if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; \
+		then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
+	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml  /tmp/$$rand  && \
+		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
+	fi ;  
+
+.PHONY: diffprod
+diffprod:
+	if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; \
+		then echo 'Skipping upload to PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
+	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml  /tmp/$$rand  && \
+		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
+	fi ;  
+
 .PHONY: deploydev
 deploydev:
-	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
-  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml; fi );
+	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml ; fi ) ;
 
 .PHONY: deployint
 deployint:
-	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
-  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml; fi );
+	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload INT cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml; fi );
 
 .PHONY: deployprod
 deployprod:
-	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] ; then echo 'Skipping upload to S3 MAPPROXY_CONFIG_BASE_PATH is not defined'; \
-  else $(PYTHONVENV)/bin/aws s3 cp --profile $(USER_NAME)_aws_admin mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
+	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
+  else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
 
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts
