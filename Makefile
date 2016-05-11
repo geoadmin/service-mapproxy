@@ -49,7 +49,7 @@ help:
 	@echo "- PYTHONVENV_OPTS                   (current value: $(PYTHONVENV_OPTS))"
 	@echo "- WMTS_BASE_URL Source for tiles    (current value: $(WMTS_BASE_URL))"
 	@echo "- MAPPROXY_BUCKET_NAME              (current value: $(MAPPROXY_BUCKET_NAME))"
-	@echo "- MAPPROXY_CONFIG_BASE_PATH         (current value: $(MAPPROXY_CONFIG_BAS_PATH))"
+	@echo "- MAPPROXY_CONFIG_BASE_PATH         (current value: $(MAPPROXY_CONFIG_BASE_PATH))"
 	@echo
 
 

@@ -300,7 +300,7 @@ grids:
     bbox_srs: EPSG:2056
     srs: EPSG:2056
     origin: nw
-    stretch_factor: 1.0
+    stretch_factor: 1.05
 
 globals:
   cache:

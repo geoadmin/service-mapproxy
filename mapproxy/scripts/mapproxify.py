@@ -56,6 +56,7 @@ DEFAULT_SERVICE_URL = os.environ.get('DEFAULT_SERVICE_URL', 'http://api3.geo.adm
 logger.info('Using %s service url.' % DEFAULT_SERVICE_URL)
 
 DEFAULT_EPSG_21781_ZOOM_LEVELS = 26
+STRETCH_FACTOR = 1.05
 
 DEFAULT_WMTS_BASE_URL = 'http://internal-vpc-lb-internal-wmts-infra-1291171036.eu-west-1.elb.amazonaws.com'
 
@@ -219,7 +220,7 @@ def create_grids(rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
            "bbox_srs": "EPSG:21781",
            "srs": "EPSG:21781",
            "origin": "nw",
-           "stretch_factor": 1.0
+           "stretch_factor": STRETCH_FACTOR
            }
 
     for i in rng:
