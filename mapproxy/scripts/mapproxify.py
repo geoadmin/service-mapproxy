@@ -310,6 +310,8 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                     image_format_out = 'jpeg'
                 elif 'ch.swisstopo.swisstlm3d' in bod_layer_id:
                     max_level = 26
+                elif 'ch.swisstopo.landeskarte' in bod_layer_id:
+                    max_level = 26
                 else:
                     image_format = layersConfig.format
                     image_format_out = image_format
