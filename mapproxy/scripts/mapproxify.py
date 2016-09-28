@@ -119,7 +119,6 @@ if MAPPROXY_BUCKET_NAME:
     else:
         USE_S3_CACHE = True
 
-
 dict_to_obj = lambda x: (type('JsonObject', (), {k: dict_to_obj(v) for k, v in x.items()})
                          if isinstance(x, dict) else x)
 
@@ -180,6 +179,7 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
                 layer_list.append(cfg['bodLayerId'])
         else:
             del js[k]
+
     return (len(layers), timestamps, layers)
 
 
@@ -280,7 +280,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
             'tile_lock_dir'] = '/tmp/mapproxy/locks'
     if MAPPROXY_PROFILE_NAME:
         mapproxy_config['globals']['cache'][
-            's3_profile_name'] = MAPPROXY_PROFILE_NAME
+            's3']['profile_name'] = MAPPROXY_PROFILE_NAME
 
     grid_names = []
 
@@ -373,8 +373,9 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             cache_dir = '/1.0.0/%s/default/%s/%s/' % (
                                 server_layer_name, timestamp, epsg_code)
                             s3_cache = {
-                                "cache_dir": cache_dir,
+                                "directory": cache_dir,
                                 "type": "s3",
+                                "bucket_name": MAPPROXY_BUCKET_NAME,
                                 "directory_layout": "tms"}
                             cache['cache'] = s3_cache
 
@@ -455,6 +456,8 @@ def main(service_url=DEFAULT_SERVICE_URL,
     if USE_S3_CACHE:
         print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
     if MAPPROXY_PROFILE_NAME:
+        print "***WARNING***"
+        print "Using a profile for AWS credential!!!"
         print "profile_name=%s" % MAPPROXY_PROFILE_NAME
         print "DO NOT DEPLOY THIS FILE.\nUsing profile will break the autoscaling cluster"
     print "WMTS tile source: ", WMTS_BASE_URL

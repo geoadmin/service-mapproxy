@@ -307,6 +307,8 @@ globals:
   cache:
     # use parallel requests to the WMTS sources
     concurrent_tile_creators: 32
+    s3: {}
+
   image:
       resampling_method: bicubic
       # for 24bits PNG
