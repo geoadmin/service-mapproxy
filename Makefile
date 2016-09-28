@@ -75,6 +75,10 @@ mapproxy: $(PYTHONVENV)/bin/mapproxy \
 .PHONY: uwsgi
 uwsgi: $(PYTHONVENV)/bin/uwsgi
 
+.PHONY: serve
+serve:
+	 $(PYTHONVENV)/bin/mapproxy-util serve-develop -b 9001 --debug mapproxy/mapproxy.yaml
+
 .PHONY: diffdev
 diffdev:
 	if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; \
@@ -131,10 +135,12 @@ ifndef MAPPROXY_BUCKET_NAME
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install mapproxy
 else 
 	$(info Using bucket $(MAPPROXY_BUCKET_NAME))
-	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install  boto3==1.4.0
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install  -e "git://github.com/mapproxy/mapproxy.git@master#egg=mapproxy"
 endif
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "webob"
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "awscli"
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "werkzeug==0.11.11"
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "httplib2==0.9.2"
 	touch $@
 
