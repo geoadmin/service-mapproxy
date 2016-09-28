@@ -179,7 +179,6 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
                 layer_list.append(cfg['bodLayerId'])
         else:
             del js[k]
-
     return (len(layers), timestamps, layers)
 
 
@@ -281,6 +280,8 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
     if MAPPROXY_PROFILE_NAME:
         mapproxy_config['globals']['cache'][
             's3']['profile_name'] = MAPPROXY_PROFILE_NAME
+        mapproxy_config['globals']['cache'][
+            's3']['bucket_name'] = MAPPROXY_BUCKET_NAME
 
     grid_names = []
 
@@ -375,7 +376,6 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             s3_cache = {
                                 "directory": cache_dir,
                                 "type": "s3",
-                                "bucket_name": MAPPROXY_BUCKET_NAME,
                                 "directory_layout": "tms"}
                             cache['cache'] = s3_cache
 
