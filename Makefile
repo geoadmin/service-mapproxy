@@ -6,7 +6,7 @@ APACHE_BASE_DIRECTORY ?= $(CURDIR)
 MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV ?= .build-artefacts/python-venv
-PYTHONVENV_OPTS ?= 
+PYTHONVENV_OPTS ?=
 WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
 MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy
 RANDOM_MAPPROXY_FILE="mapproxy.$$rand.yaml"
@@ -27,7 +27,7 @@ help:
 	@echo
 	@echo "- all              Install everything"
 	@echo "- mapproxy         Install and configure mapproxy"
-	@echo "- config           Configure mapproxy (mapproxy.yaml)"
+	@echo "- config           Configure mapproxy and create mapproxy.yaml (make config API_URL=http://mf-chsdi3.dev.bgdi.ch)"
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
@@ -63,7 +63,7 @@ apache: apache/app.conf
 
 .PHONY: config
 config: .build-artefacts/python-venv
-	${PYTHON_CMD} mapproxy/scripts/mapproxify.py $(API_URL)  
+	${PYTHON_CMD} mapproxy/scripts/mapproxify.py $(API_URL)
 	touch $@
 
 .PHONY: mapproxy
@@ -81,7 +81,7 @@ diffdev:
 		then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
 	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml  /tmp/$$rand  && \
 		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
-	fi ;  
+	fi ;
 
 .PHONY: diffint
 diffint:
@@ -89,7 +89,7 @@ diffint:
 		then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
 	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml  /tmp/$$rand  && \
 		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
-	fi ;  
+	fi ;
 
 .PHONY: diffprod
 diffprod:
@@ -97,7 +97,7 @@ diffprod:
 		then echo 'Skipping upload to PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
 	else rand=$$RANDOM  && $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME)  s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml  /tmp/$$rand  && \
 		diff mapproxy/mapproxy.yaml /tmp/$$rand && echo "Files are identical" || echo "Differences between files" ;  \
-	fi ;  
+	fi ;
 
 .PHONY: deploydev
 deploydev:
@@ -129,7 +129,7 @@ deployprod:
 .build-artefacts/python-venv/bin/mapproxy: .build-artefacts/python-venv
 ifndef MAPPROXY_BUCKET_NAME
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install mapproxy
-else 
+else
 	$(info Using bucket $(MAPPROXY_BUCKET_NAME))
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install  -e "git://github.com/procrastinatio/mapproxy.git@s3#egg=mapproxy"
 endif
@@ -142,7 +142,7 @@ endif
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "uwsgi==2.0.11"
 	touch $@
 
-apache/app.conf: apache/app.mako-dot-conf 
+apache/app.conf: apache/app.mako-dot-conf
 	${PYTHON_CMD} $(PYTHONVENV)/bin/mako-render \
 		--var "apache_base_directory=$(APACHE_BASE_DIRECTORY)" \
 		--var "modwsgi_user=$(MODWSGI_USER)" \
@@ -154,7 +154,7 @@ mapproxy/application.py:  mapproxy/application-dot-py
 	    --var "apache_base_path=$(APACHE_BASE_PATH)"  $< > $@
 
 mapproxy/wsgi.py: mapproxy/createWsgi.py
-	  ${PYTHON_CMD} mapproxy/createWsgi.py 
+	  ${PYTHON_CMD} mapproxy/createWsgi.py
 
 mapproxy.ini:  mapproxy-dot-ini
 	${PYTHON_CMD} $(PYTHONVENV)/bin/mako-render \
