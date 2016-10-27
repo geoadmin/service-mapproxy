@@ -75,6 +75,12 @@ mapproxy: $(PYTHONVENV)/bin/mapproxy \
 .PHONY: uwsgi
 uwsgi: $(PYTHONVENV)/bin/uwsgi
 
+
+.PHONY: serve
+serve:
+	$(PYTHONVENV)/bin/mapproxy-util serve-develop -b 0.0.0.0:9001 --debug mapproxy/mapproxy.yaml
+
+
 .PHONY: diffdev
 diffdev:
 	if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; \
