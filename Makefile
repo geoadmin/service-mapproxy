@@ -28,6 +28,7 @@ help:
 	@echo "- all              Install everything"
 	@echo "- mapproxy         Install and configure mapproxy"
 	@echo "- config           Configure mapproxy and create mapproxy.yaml (make config API_URL=http://mf-chsdi3.dev.bgdi.ch)"
+	@echo "- devconfig        Configure mapproxy and create mapproxy.yaml **without** S3 cache"
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
@@ -64,6 +65,11 @@ apache: apache/app.conf
 .PHONY: config
 config: .build-artefacts/python-venv
 	${PYTHON_CMD} mapproxy/scripts/mapproxify.py $(API_URL)
+	touch $@
+
+.PHONY: devconfig
+devconfig: .build-artefacts/python-venv
+	env - API_URL="$$API_URL" WMTS_BASE_URL="$$WMTS_BASE_URL" ${PYTHON_CMD}  mapproxy/scripts/mapproxify.py $(API_URL)
 	touch $@
 
 .PHONY: mapproxy
