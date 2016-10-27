@@ -141,7 +141,7 @@ def getTopics(service_url=DEFAULT_SERVICE_URL):
     return topics
 
 
-def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
+def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics, requested_layers=None):
     layers = []
     timestamps = 0
     h = httplib2.Http()
@@ -175,6 +175,8 @@ def getLayersConfigs(service_url=DEFAULT_SERVICE_URL, topics=topics):
                 timestamps += len(cfg['timestamps'])
 
             if USE_SERVERNAME_AS_BODID and cfg['bodLayerId'] not in layer_list:
+                if requested_layers is not None and cfg['bodLayerId'] not in requested_layers:
+                    continue
                 layer = dict_to_obj(cfg)
                 layers.append(layer)
                 layer_list.append(cfg['bodLayerId'])
@@ -213,12 +215,15 @@ def get_mapproxy_template_config(services):
     return mapproxy_config
 
 
-def create_grids(rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
+def create_grids(epsg=21781, rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
+    if epsg not in [21781, 2056]:
+        return None
+
     grids = {}
     tpl = {"res": [],
            "bbox": [420000, 30000, 900000, 350000],
            "bbox_srs": "EPSG:21781",
-           "srs": "EPSG:21781",
+           "srs": "EPSG:{}".format(epsg),
            "origin": "nw",
            "stretch_factor": STRETCH_FACTOR
            }
@@ -227,7 +232,7 @@ def create_grids(rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
         if i <= len(EPSG_21781_RESOlUTIONS):
             g = dict(tpl)
             g["res"] = EPSG_21781_RESOlUTIONS[:i]
-            grids["epsg_21781_%s" % (i-1)] = g
+            grids["epsg_{}_{}".format(epsg, (i - 1))] = g
 
     return grids
 
@@ -269,9 +274,11 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
     mapproxy_config = get_mapproxy_template_config(services)
 
-    grids = create_grids()
+    epsg_21781_grids = create_grids()
+    epsg_2056_grids = create_grids(epsg=2056)
 
-    mapproxy_config['grids'].update(grids)
+    mapproxy_config['grids'].update(epsg_2056_grids)
+    mapproxy_config['grids'].update(epsg_21781_grids)
 
     if USE_S3_CACHE:
         mapproxy_config['globals']['cache'][
@@ -303,7 +310,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
                 timestamps = layersConfig.timestamps
                 current_timestamp = timestamps[0]
-                
+
                 # special cases
                 if bod_layer_id == 'ch.swisstopo.zeitreihen':
                     image_format = 'png'
@@ -421,12 +428,12 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
 
 
 def main(service_url=DEFAULT_SERVICE_URL,
-         topics=None, services=DEFAULT_SERVICES):
+         topics=None, layers=None, services=DEFAULT_SERVICES):
 
     if topics is None:
         topics = getTopics(service_url=service_url)
     build_date = datetime.now()
-    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(service_url=service_url, topics=topics)
+    layers_nb, timestamps_nb, layersConfig = getLayersConfigs(service_url=service_url, topics=topics, requested_layers=layers)
 
     mapproxy_config = generate_mapproxy_config(layersConfig, services=services)
 
@@ -477,6 +484,13 @@ if __name__ == '__main__':
         help='Use layers from these topics. Default to use all topics from map.geo.admin.ch',
         required=False)
     parser.add_argument(
+        '-l',
+        '--layers',
+        nargs='+',
+        type=str,
+        help='Use layers only',
+        required=False)
+    parser.add_argument(
         '-s',
         '--services',
         nargs='+',
@@ -489,4 +503,5 @@ if __name__ == '__main__':
     main(
         service_url=results.url,
         topics=results.topics,
+        layers=results.layers,
         services=results.services)
