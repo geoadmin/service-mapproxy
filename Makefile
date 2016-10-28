@@ -7,7 +7,7 @@ MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV ?= .build-artefacts/python-venv
 PYTHONVENV_OPTS ?=
-WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
+WMTS_BASE_URL ?= http://s3-eu-west-1.amazonaws.com/akiai4jxkwjqv5tgsaoq-wmts
 MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy
 RANDOM_MAPPROXY_FILE="mapproxy.$$rand.yaml"
 export WMTS_BASE_URL
