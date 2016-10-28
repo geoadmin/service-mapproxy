@@ -237,14 +237,15 @@ def create_grids(epsg=21781, rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
     return grids
 
 
-def create_wmts_source(server_layer_name, timestamp):
+def create_wmts_source(server_layer_name, timestamp, wmts_source_grid):
     # original source (one for all projection)
+    # only epsg:21781, but different zoom levels 
     wmts_url = WMTS_BASE_URL + "/1.0.0/" + server_layer_name + \
         "/default/" + timestamp + "/21781/%(z)d/%(y)d/%(x)d.%(format)s"
 
     wmts_source = {"url": wmts_url,
                    "type": "tile",
-                   "grid": "swisstopo-pixelkarte",
+                   "grid": wmts_source_grid,
                    "transparent": True,
                    "on_error": {
                        204: {
@@ -339,9 +340,9 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             'values': [timestamp]}}
 
                     # original source (one for all projection)
-                    wmts_source = create_wmts_source(
-                        server_layer_name, timestamp)
                     wmts_source_grid = "epsg_21781_%s" % (max_level)
+                    wmts_source = create_wmts_source(
+                        server_layer_name, timestamp, wmts_source_grid)
 
                     wmts_cache = {
                         "sources": [wmts_source_name],
@@ -461,6 +462,11 @@ def main(service_url=DEFAULT_SERVICE_URL,
     print "Layers: %d, timestamps: %d" % (layers_nb, timestamps_nb)
     if USE_S3_CACHE:
         print "Using S3 cache: bucket=%s" % MAPPROXY_BUCKET_NAME
+    else: 
+        print
+        print "WARNING !!!!!"
+        print "Build WITHOUT S3 cache. Is it really want you want ?"
+        print
     if MAPPROXY_PROFILE_NAME:
         print "profile_name=%s" % MAPPROXY_PROFILE_NAME
         print "DO NOT DEPLOY THIS FILE.\nUsing profile will break the autoscaling cluster"
