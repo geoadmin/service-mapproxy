@@ -7,7 +7,7 @@ MODWSGI_USER ?= $(shell id -un)
 API_URL ?= http://api3.geo.admin.ch
 PYTHONVENV ?= .build-artefacts/python-venv
 PYTHONVENV_OPTS ?=
-WMTS_BASE_URL ?= http://wmts6.geo.admin.ch
+WMTS_BASE_URL ?= http://s3-eu-west-1.amazonaws.com/akiai4jxkwjqv5tgsaoq-wmts
 MAPPROXY_CONFIG_BASE_PATH ?=swisstopo-internal-filesharing/config/mapproxy
 RANDOM_MAPPROXY_FILE="mapproxy.$$rand.yaml"
 export WMTS_BASE_URL
@@ -28,6 +28,7 @@ help:
 	@echo "- all              Install everything"
 	@echo "- mapproxy         Install and configure mapproxy"
 	@echo "- config           Configure mapproxy and create mapproxy.yaml (make config API_URL=http://mf-chsdi3.dev.bgdi.ch)"
+	@echo "- devconfig        Configure mapproxy and create mapproxy.yaml **without** S3 cache"
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
 	@echo "- clean            Remove generated files"
@@ -66,6 +67,11 @@ config: .build-artefacts/python-venv
 	${PYTHON_CMD} mapproxy/scripts/mapproxify.py $(API_URL)
 	touch $@
 
+.PHONY: devconfig
+devconfig: .build-artefacts/python-venv
+	env - API_URL="$$API_URL" WMTS_BASE_URL="$$WMTS_BASE_URL" ${PYTHON_CMD}  mapproxy/scripts/mapproxify.py $(API_URL)
+	touch $@
+
 .PHONY: mapproxy
 mapproxy: $(PYTHONVENV)/bin/mapproxy \
 	.build-artefacts/python-venv/bin/mako-render \
@@ -74,6 +80,12 @@ mapproxy: $(PYTHONVENV)/bin/mapproxy \
 
 .PHONY: uwsgi
 uwsgi: $(PYTHONVENV)/bin/uwsgi
+
+
+.PHONY: serve
+serve:
+	$(PYTHONVENV)/bin/mapproxy-util serve-develop -b 0.0.0.0:9001 --debug mapproxy/mapproxy.yaml
+
 
 .PHONY: diffdev
 diffdev:
