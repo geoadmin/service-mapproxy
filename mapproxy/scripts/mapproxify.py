@@ -365,6 +365,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                         #layer = {'name': layer_name, 'title': "%s (%s)" % (title, timestamp), 'dimensions': dimensions, 'sources': [cache_out_name]}
                         layer = {'name': layer_name, 'title': "%s (%s)" % (
                             title, timestamp), 'sources': [cache_out_name]}
+                        # For EPSG:2056, we should use a gutter as grid reprojection makes the tiles non-square
                         cache = {
                             "sources": [wmts_cache_name],
                             "format": "image/%s" %
@@ -374,7 +375,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             "meta_size": [
                                 1,
                                 1],
-                            "meta_buffer": 0}
+                            "meta_buffer": 0 if epsg_code != '2056' else 20}
                         if USE_S3_CACHE:
                             cache['disable_storage'] = False
 
@@ -387,7 +388,7 @@ def generate_mapproxy_config(layersConfigs, services=DEFAULT_SERVICES):
                             cache['cache'] = s3_cache
 
                         if '.swissimage' in wmts_cache_name:
-                            cache["image"] = {"resampling_method": "bilinear"}
+                            cache["image"] = {"resampling_method": "bicubic"}
                         elif '.swisstlm3d-karte' in wmts_cache_name:
                             cache["image"] = {"resampling_method": "nearest"}
 
