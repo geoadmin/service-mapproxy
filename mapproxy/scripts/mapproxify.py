@@ -219,11 +219,16 @@ def create_grids(epsg=21781, rng=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]):
     if epsg not in [21781, 2056]:
         return None
 
+    bboxes = {21781:  [420000, 30000, 900000, 350000],
+            2056: [2420000.0, 1030000.0, 2900000.0, 1350000.0]
+            }
+    epsg_str =  "EPSG:{}".format(epsg)
+
     grids = {}
     tpl = {"res": [],
-           "bbox": [420000, 30000, 900000, 350000],
-           "bbox_srs": "EPSG:21781",
-           "srs": "EPSG:{}".format(epsg),
+           "bbox": bboxes[epsg],
+           "bbox_srs": epsg_str,
+           "srs": epsg_str,
            "origin": "nw",
            "stretch_factor": STRETCH_FACTOR
            }
