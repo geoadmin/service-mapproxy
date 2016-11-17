@@ -43,6 +43,8 @@ help:
 	@echo "- deploydev        Deploy local mapproxy.yaml to dev"
 	@echo "- deployint        Deploy local mapproxy.yaml to int"
 	@echo "- deployprod       Deploy local mapproxy.yaml to prod"
+	@echo "- listconfig       List configs on STAGING (last 30 days)"
+	@echo "- downloadconfig   Download config with version VERSION_ID, STAGING to OUTPUT."
 	@echo "- help             Display this help"
 	@echo
 	@echo "Variables:"
