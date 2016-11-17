@@ -138,4 +138,27 @@ Do the same for `int` and `prod`.
     $ make config API_URL=http://mf-chsdi3.int.bgdi.ch
 
 
+## Listing and retrieving older version from config bucket
 
+Listing all versions (up to 30 days) which are used by the production cluster:
+
+    $ make listconfig STAGING=prod
+    
+    Bucket: swisstopo-internal-filesharing
+    staging: prod
+    Config file: config/mapproxy/prod/mapproxy.yaml
+    Latest          Version_id              Last modified
+    -------------------------------------------------------
+    True qAQXjhpifJK_WsClyS1vOVvcpbr.BET. 2016-11-16 15:26
+    False HwvXKzZSLe07Saa4wBudMJH3fPO7RGC8 2016-11-15 08:00
+    False Bk_tBL1PrjaKnD_At5Nx.II2KGDW50CF 2016-10-28 11:14
+    False sgnVcgg25NEopVpOts.zKotF9iB66uFz 2016-10-26 13:10
+    False gz8_iy3A.WGWo96EEjb_JtOtDJLJ9Bql 2016-10-26 12:50
+    False sjRvIlHZJv9yOKt.PAOYc7UxSEXYz5mr 2016-10-19 14:32
+    False dG4swtkRSAvWtgZfkOWhL0M5.ariZQnb 2016-10-05 14:24
+
+
+Saving version from `2016-10-05` to `working.yaml`:
+
+    $ make downloadconfig  STAGING=prod VERSION_ID=dG4swtkRSAvWtgZfkOWhL0M5.ariZQnb  OUTPUT=working.yaml
+    Saving config to 'working.yaml'

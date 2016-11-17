@@ -17,7 +17,12 @@ export WMTS_BASE_URL
 ## So prepend all python scripts with python cmd
 ## See: https://bugs.launchpad.net/virtualenv/+bug/241581/comments/11
 PYTHON_CMD=$(PYTHONVENV)/bin/python
+PIP_CMD := $(PYTHONVENV)/bin/pip
 
+# Colors
+RESET := $(shell tput sgr0)
+RED := $(shell tput setaf 1)
+GREEN := $(shell tput setaf 2)
 
 .PHONY: help
 help:
@@ -52,12 +57,33 @@ help:
 	@echo "- MAPPROXY_BUCKET_NAME              (current value: $(MAPPROXY_BUCKET_NAME))"
 	@echo "- MAPPROXY_CONFIG_BASE_PATH         (current value: $(MAPPROXY_CONFIG_BASE_PATH))"
 	@echo
+	@echo "Usage:"
+	@echo 
+	@echo "List all versions on int:"
+	@echo "    make listconfig STAGING=int"
+	@echo "Download a specific config from prod:"
+	@echo "    make downloadconfig  STAGING=prod VERSION_ID=dG4swtkRSAvWtgZfkOWhL0M5.ariZQnb  OUTPUT=working.yaml"
+
+
 
 
 .PHONY: all
-all: mapproxy \
+all: $(PYTHONVENV)/requirements.timestamp mapproxy \
 	apache \
 	config
+
+$(PYTHONVENV):
+		@if [ ! -d $(PYTHONVENV) ]; \
+		then \
+				echo "${GREEN}Setting up python virtual env...${RESET}"; \
+				virtualenv $@ --system-site-packages; \
+		fi
+
+requirements.txt:
+$(PYTHONVENV)/requirements.timestamp: requirements.txt $(PYTHONVENV)
+	${PIP_CMD} install -U pip wheel setuptools;
+	${PIP_CMD} install -r requirements.txt;
+	touch $@
 
 .PHONY: apache
 apache: apache/app.conf
@@ -126,9 +152,15 @@ deployprod:
 	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
   else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
 
-.build-artefacts/python-venv:
-	mkdir -p .build-artefacts
-	virtualenv ${PYTHONVENV_OPTS}  $@
+.PHONY: listconfig
+listconfig:
+	(if [[ -z "$(STAGING)" ]] ; then echo 'Skipping listing config, STAGING is not set'; \
+  else $(PYTHONVENV)/bin/python mapproxy/scripts/versions.py --staging $(STAGING); fi );
+
+.PHONY: downloadconfig
+downloadconfig:
+	(if [[ -z "$(STAGING)" || -z "$(VERSION_ID) || -z $(OUTPUT)" ]] ; then echo 'Skipping downloading mapproxy.yaml, STAGING, OUTPUT and/or VERSION_ID are not set'; \
+  else $(PYTHONVENV)/bin/python mapproxy/scripts/versions.py --staging $(STAGING) --version_id $(VERSION_ID) --output $(OUTPUT); fi );
 
 .build-artefacts/python-venv/bin/mako-render: .build-artefacts/python-venv
 	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install "Mako==1.0.0"
