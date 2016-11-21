@@ -38,6 +38,7 @@ help:
 	@echo "- deploydev        Deploy local mapproxy.yaml to dev"
 	@echo "- deployint        Deploy local mapproxy.yaml to int"
 	@echo "- deployprod       Deploy local mapproxy.yaml to prod"
+	@echo "- cleancache       Delete cached tiles for EPSG. Dangerous"
 	@echo "- help             Display this help"
 	@echo
 	@echo "Variables:"
@@ -125,6 +126,10 @@ deployint:
 deployprod:
 	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
   else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
+
+.PHONY: cleancache
+cleancache:
+	./scripts/cleancache.sh
 
 .build-artefacts/python-venv:
 	mkdir -p .build-artefacts

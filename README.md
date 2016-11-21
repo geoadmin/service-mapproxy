@@ -49,6 +49,12 @@ list from _/rest/services/all/MapServer/layersConfig_ on the `API_URL` defined h
    If these variable are not defined and mapproxy does not support S3 caching, a normal `mapproxy.yaml`
     will be generated (i.e. without caching)
 
+Sometime, you don't want to cache anything, to test different setting:
+
+    $ make devconfig
+
+**WARNING** Never ever upload the resulting `mapproxy.yaml` to the production cluster.
+
 ###Testing:
 
 Testing is a bit tricky since accessing the AWS S3 bucket is done with an **instance IAM** on the mapproxy cluster and through a **AWS profile** locally on mf0.dev.bgdi.ch. Both options are being mutually exclusive.
@@ -137,5 +143,21 @@ Do the same for `int` and `prod`.
 
     $ make config API_URL=http://mf-chsdi3.int.bgdi.ch
 
+## Cleaning the cache
 
+There are two levels of cache:
 
+  * Generated tiles in MAPPROXY_BUCKET_NAME, which are never automatically deleted
+  * AWS CloudFront CLOUDFRONT_PRODUCTION_DISTRO, with a lifespan of about a few hours to a week
+
+To erase **all** tiles for EPSG=4326 code in MAPPROXY_BUCKET_NAME, do:
+
+    $ EPSG=4326 make cleancache
+
+You need to install the excellent `tool-aws`scripts, with:
+
+    $(mypythonenv) pip install -U tool-aws
+
+To invalidate the AWS CloudFront, use `AWS CLI` tools, but **really** be sure to **fully** understand what you are doing:
+
+    $(mypythonenv) aws cloudfront create-invalidation  --profile ${PROFILE_NAME}  --distribution-id ${CLOUDFRONT_PRODUCTION_DISTRO} --paths '/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/4326/*’
