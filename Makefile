@@ -31,13 +31,14 @@ help:
 	@echo "- devconfig        Configure mapproxy and create mapproxy.yaml **without** S3 cache"
 	@echo "- apache           Configure Apache (restart required)"
 	@echo "- uwsgi            Install uwsgi"
-	@echo "- clean            Remove generated files"
 	@echo "- diffdev          Display diff between local mapproxy.yaml and config on S3 dev"
 	@echo "- diffint          Display diff between local mapproxy.yaml and config on S3 int"
 	@echo "- diffprod         Display diff between local mapproxy.yamland config on S3 prod"
 	@echo "- deploydev        Deploy local mapproxy.yaml to dev"
 	@echo "- deployint        Deploy local mapproxy.yaml to int"
 	@echo "- deployprod       Deploy local mapproxy.yaml to prod"
+	@echo "- clean            Remove generated files"
+	@echo "- cleanall         Remove all the build artefacts"
 	@echo "- help             Display this help"
 	@echo
 	@echo "Variables:"
@@ -175,7 +176,11 @@ mapproxy.ini:  mapproxy-dot-ini
 
 .PHONY: clean
 clean:
-	rm -rf .build-artefacts
 	rm mapproxy.ini
 	rm apache/app.conf
 	rm mapproxy/mapproxy.yaml
+
+.PHONY: cleanall
+cleanall: clean
+	rm -rf .build-artefacts
+	rm -rf *.egg-info
