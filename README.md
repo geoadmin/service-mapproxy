@@ -49,6 +49,25 @@ list from _/rest/services/all/MapServer/layersConfig_ on the `API_URL` defined h
    If these variable are not defined and mapproxy does not support S3 caching, a normal `mapproxy.yaml`
     will be generated (i.e. without caching)
 
+### Small mapproxy.yaml
+
+To debug a single layer, the *full monty* mapproxy.yaml is sometime confusing. You may want to generate a slimmed down file,
+for instance only for layer _ch.swisstopo.swissimage_:
+
+    $ .build-artefacts/python-venv/bin/python  ./mapproxy/scripts/mapproxify.py --layers ch.swisstopo.swissimage
+    INFO:mapproxify:Using http://api3.geo.admin.ch service url.
+    INFO:mapproxy.system:using libproj for coordinate transformation
+    INFO:mapproxify:Layer: 1 - ch.swisstopo.swissimage
+    INFO:mapproxify:Configuration done
+    INFO:mapproxify:Writing mapproxy/mapproxy.yaml
+    
+    Service url: http://api3.geo.admin.ch
+    Topics: blw,are,bafu,swisstopo,astra,kgs,funksender,nga,ivs,sachplan,geol,luftbilder,wildruhezonen,vu,aviation,verteidigung,gewiss,geothermie,schneesport,energie,cadastre,emapis,geodesy,inspire,ech,api
+    Layers: 1, timestamps: 800
+    Using S3 cache: bucket=zfh98q3453hkp-tiles-s3-cache
+    WMTS tile source:  http://s3-eu-west-1.amazonaws.com/akiai4jxkwjqv5tgsaoq-wmts
+
+
 ###Testing:
 
 Testing is a bit tricky since accessing the AWS S3 bucket is done with an **instance IAM** on the mapproxy cluster and through a **AWS profile** locally on mf0.dev.bgdi.ch. Both options are being mutually exclusive.
