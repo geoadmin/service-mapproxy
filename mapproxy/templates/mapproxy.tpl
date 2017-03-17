@@ -79,7 +79,7 @@ sources:
     type: wms
     wms_opts:
       version: 1.1.1
-    supported_srs: ['EPSG:21781']
+    supported_srs: ['EPSG:2056']
     req:
       url: http://wms.cadastralwebmap.ch/WMS
       layers: cm_wms
@@ -134,7 +134,7 @@ caches:
     disable_storage: true
     format: image/png
     grids:
-    - epsg_21781
+    - epsg_2056
     sources:
     - ch.kantone.cadastralwebmap-farbe_wms_source
   ch.kantone.cadastralwebmap-farbe_epsg_21781_cache_out:
