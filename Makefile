@@ -129,6 +129,7 @@ deployprod:
 
 .PHONY: cleancache
 cleancache:
+	${PYTHON_CMD} $(PYTHONVENV)/bin/pip install -U tool_aws
 	./scripts/cleancache.sh
 
 .build-artefacts/python-venv:

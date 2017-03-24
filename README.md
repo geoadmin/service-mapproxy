@@ -180,10 +180,6 @@ To erase **all** tiles for EPSG=4326 code in MAPPROXY_BUCKET_NAME, do:
 
     $ EPSG=4326 make cleancache
 
-You need to install the excellent `tool-aws`scripts, with:
-
-    $(mypythonenv) pip install -U tool-aws
-
 To invalidate the AWS CloudFront, use `AWS CLI` tools, but **really** be sure to **fully** understand what you are doing:
 
     $(mypythonenv) aws cloudfront create-invalidation  --profile ${PROFILE_NAME}  --distribution-id ${CLOUDFRONT_PRODUCTION_DISTRO} --paths '/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/4326/*’
