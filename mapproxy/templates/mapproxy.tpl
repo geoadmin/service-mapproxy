@@ -78,8 +78,8 @@ sources:
   ch.kantone.cadastralwebmap-farbe_wms_source:
     type: wms
     wms_opts:
-      version: 1.1.1
-    supported_srs: ['EPSG:21781']
+      version: 1.3.0
+    supported_srs: ['EPSG:2056']
     req:
       url: http://wms.cadastralwebmap.ch/WMS
       layers: cm_wms
@@ -134,9 +134,14 @@ caches:
     disable_storage: true
     format: image/png
     grids:
-    - epsg_21781
+    - epsg_2056
     sources:
     - ch.kantone.cadastralwebmap-farbe_wms_source
+    bulk_meta_tiles: false
+    meta_buffer: 0
+    meta_size:
+     - 1
+     - 1
   ch.kantone.cadastralwebmap-farbe_epsg_21781_cache_out:
      disable_storage: true
      format: image/png
@@ -144,8 +149,8 @@ caches:
      - epsg_21781
      meta_buffer: 0
      meta_size:
-     - 2
-     - 2
+     - 1
+     - 1
      sources:
      - ch.kantone.cadastralwebmap-farbe_cache
   ch.kantone.cadastralwebmap-farbe_epsg_2056_cache_out:
@@ -153,10 +158,11 @@ caches:
      format: image/png
      grids:
      - epsg_2056
+     bulk_meta_tiles: false
      meta_buffer: 0
      meta_size:
-     - 2
-     - 2
+     - 1
+     - 1
      sources:
      - ch.kantone.cadastralwebmap-farbe_cache
   ch.kantone.cadastralwebmap-farbe_epsg_3857_cache_out:
@@ -166,8 +172,8 @@ caches:
      - epsg_3857
      meta_buffer: 0
      meta_size:
-     - 2
-     - 2
+     - 1
+     - 1
      sources:
      - ch.kantone.cadastralwebmap-farbe_cache
   ch.kantone.cadastralwebmap-farbe_epsg_4258_cache_out:
@@ -177,8 +183,8 @@ caches:
      - epsg_4258
      meta_buffer: 0
      meta_size:
-     - 2
-     - 2
+     - 1
+     - 1
      sources:
      - ch.kantone.cadastralwebmap-farbe_cache
   ch.kantone.cadastralwebmap-farbe_epsg_4326_cache_out:
@@ -188,8 +194,8 @@ caches:
      - epsg_4326
      meta_buffer: 0
      meta_size:
-     - 2
-     - 2
+     - 1
+     - 1
      sources:
      - ch.kantone.cadastralwebmap-farbe_cache
   osm_cache:
@@ -300,7 +306,7 @@ grids:
     bbox_srs: EPSG:2056
     srs: EPSG:2056
     origin: nw
-    stretch_factor: 1.05
+    stretch_factor: 1.10
 
 globals:
   cache:
