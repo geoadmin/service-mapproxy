@@ -61,13 +61,39 @@ Testing is a bit tricky since accessing the AWS S3 bucket is done with an **inst
 
 **Using a profile on the mapproxy cluster breaks everything. Do not try.**
 
-If you really want to test locally, either build without AWS S3 cache by simply doing
+There are **three** steps
+
+1. Locally with not *cache*
+
+To debug requests and mapproxy files, you may build it without S3 and serve it by Mapproxy tools:
+
+    $ make devconfig
+
+    $ mapproxy-util serve-develop --debug -b :9001 mapproxy/mapproxy.yaml
+
+
+Nota: The same can be achieved by unseting MAPPROXY_BUCKET_NAME:
 
     $ unset MAPPROXY_BUCKET_NAME
 
-or define a profile name:
+
+2. Locally with AWS S3 writing
+
+To test locally the writing to S3, you have to define an AWS profile name
+
 
     $ export MAPPROXY_PROFILE_NAME=$HOME_aws_admin
+
+And serve it a before:
+
+    $ mapproxy-util serve-develop --debug -b :9001 mapproxy/mapproxy.yaml
+
+
+3. Testing with uWSGI
+
+Install uWSGI:
+
+    $ pip install uwsgi
 
 Then, you may running the local uWSGI server:
 
