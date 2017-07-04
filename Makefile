@@ -114,17 +114,17 @@ diffprod:
 
 .PHONY: deploydev
 deploydev:
-	(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
+	@(if [ -z "$(MAPPROXY_CONFIG_BASE_PATH)" ] || [ -z "$(PROFILE_NAME)" ] ; then echo 'Skipping upload to DEV cluster. Either MAPPROXY_CONFIG_BASE_PATH  or PROFILE_NAME is not defined'; \
   else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/dev/mapproxy.yaml ; fi ) ;
 
 .PHONY: deployint
 deployint:
-	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload INT cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
+	@(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload INT cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
   else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/int/mapproxy.yaml; fi );
 
 .PHONY: deployprod
 deployprod:
-	(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
+	@(if [[ -z "$(MAPPROXY_CONFIG_BASE_PATH)" || -z "$(PROFILE_NAME)" ]] ; then echo 'Skipping upload PROD cluster. Either MAPPROXY_CONFIG_BASE_PATH or PROFILE_NAME is not defined'; \
   else $(PYTHONVENV)/bin/aws s3 cp --profile $(PROFILE_NAME) mapproxy/mapproxy.yaml s3://$(MAPPROXY_CONFIG_BASE_PATH)/prod/mapproxy.yaml; fi );
 
 .PHONY: cleancache
