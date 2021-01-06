@@ -2,6 +2,7 @@
 
 Mapproxy configuration and service for 'geo.admin.ch'!
 
+**Warning:** this project has been archived since it's no longer used in production and is not maintained anymore!
 
 ## Getting started
 
